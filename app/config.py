@@ -96,6 +96,8 @@ class Settings(BaseSettings):
     sms_grace_minutes: int = 120
 
     # ── Runtime ───────────────────────────────────────────────────────────
+    rate_limit_per_minute: int = 30
+
     tz: str = "Asia/Tehran"
     log_level: str = "INFO"
     http_host: str = "0.0.0.0"

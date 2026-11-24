@@ -48,13 +48,25 @@ Log of milestone completion. Each milestone ends with tests green + a demo.
   socket `.pgsock/`, data `.pgtest/`). Test DB `fanic_test` is auto-created and
   migrated by `tests/conftest.py`.
 
-## M2 — Signup & verification (in progress)
+## M2 — Signup & verification ✅
 
+**Done**
 - Backfilled required docs (PLAN/TASKS/task files/ARCHITECTURE/DATABASE/PAYMENTS/
   DECISIONS/CHANGELOG/legal notes).
-- Added Farsi locale + digit/name/phone helpers (TASK-010).
+- Single Farsi locale (`app/locales/fa.json`) + digit/name/phone/time helpers;
+  locale-coverage tests enforce that every referenced key exists and no
+  product-specific wording leaks into the engine.
+- aiogram dispatcher with Redis FSM (in-memory fallback), per-update DB session,
+  user/admin-role injection, admin guard and per-user rate limiting.
+- Full signup wizard: 18+ gate → name → contact/manual phone → confirm →
+  `pending`. Pending/blocked/rejected users are locked out of the shop.
+- Admin panel `/admin`: pending queue, user cards, approve/reject/block/unblock,
+  search; signup notifications with inline buttons to admins and the admin group.
+- Fake Telegram transport enables end-to-end handler tests without network.
 - Fixed `SMS_DEVICE_IDS` parsing, Docker migration/locales paths, env-ified
-  Postgres credentials, ruff `zip(strict=)`.
+  Postgres credentials, router reuse across dispatchers and ruff warnings.
+- **70 tests green** (unit + real-Postgres integration + end-to-end handler);
+  ruff and mypy clean.
 
 ## M3 — Catalog & cart (pending)
 ## M4 — Checkout & orders (pending)

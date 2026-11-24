@@ -2,8 +2,18 @@
 
 ## Unreleased
 
-- M2 (in progress): single-file Farsi locale, digit/name/phone helpers; fixed
-  `SMS_DEVICE_IDS` parsing, Docker migration paths and ruff warnings.
+- Next: M3 catalog & cart.
+
+## v0.3.0-signup (2026-11-24)
+
+- Single-file Farsi locale plus digit/name/phone/time helpers and locale-coverage tests.
+- aiogram dispatcher with Redis/in-memory FSM, DB session middleware, admin guard
+  and per-user rate limiting.
+- Mandatory 18+ signup wizard with contact/manual phone and admin approval flow.
+- Admin panel for pending users, approve/reject/block/unblock/search; signup notices
+  to admins and the admin group.
+- Fake Telegram transport for end-to-end handler tests; 70 tests green, ruff/mypy clean.
+- Fixed env list parsing, Docker migration paths and idempotent dispatcher construction.
 - Docs backfilled after plan approval: `PLAN.md`, `TASKS.md`, per-task files,
   `ARCHITECTURE.md`, `DATABASE.md`, `PAYMENTS.md`, `DECISIONS.md`, this changelog.
 

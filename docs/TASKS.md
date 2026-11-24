@@ -18,10 +18,10 @@ Status: `todo` | `in progress` | `done`. Tick `- [x]` only when the task file sa
 
 ## M2 — Signup & verification (tag `v0.3.0-signup`)
 
-- [ ] `TASK-010` [Localization file](tasks/TASK-010-localization.md) — all Farsi strings in `locales/fa.json`. **todo**
-- [ ] `TASK-011` [FSM & rate limiting](tasks/TASK-011-fsm.md) — aiogram FSM with Redis + in-memory fallback, per-user limits. **todo**
-- [ ] `TASK-012` [Signup flow](tasks/TASK-012-signup-flow.md) — age gate, name, phone contact/manual, pending state. **todo**
-- [ ] `TASK-013` [Admin verification](tasks/TASK-013-admin-verification.md) — notification, approve/reject, user notice. **todo**
+- [x] `TASK-010` [Localization file](tasks/TASK-010-localization.md) — all Farsi strings in `locales/fa.json`. **done**
+- [x] `TASK-011` [FSM & rate limiting](tasks/TASK-011-fsm.md) — aiogram FSM with Redis + in-memory fallback, per-user limits. **done**
+- [x] `TASK-012` [Signup flow](tasks/TASK-012-signup-flow.md) — age gate, name, phone contact/manual, pending state. **done**
+- [x] `TASK-013` [Admin verification](tasks/TASK-013-admin-verification.md) — notification, approve/reject, user notice. **done**
 
 ## M3 — Catalog & cart (tag `v0.4.0-catalog`)
 
