@@ -2,7 +2,14 @@
 
 ## Unreleased
 
-- Next: M5 payments & wallet.
+- Next: M6 admin panel.
+
+## v0.6.0-payments (2026-11-24)
+
+- Unique-amount payment intents, expiry and card instructions.
+- HMAC SMS webhook + parser, deduplication and transactional matching.
+- Receipt upload with admin approval and wallet ledger with idempotency.
+- `payment_overpay` ledger type migration; 100 tests green, ruff/mypy clean.
 
 ## v0.5.0-orders (2026-11-24)
 

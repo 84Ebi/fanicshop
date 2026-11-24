@@ -88,7 +88,18 @@ Log of milestone completion. Each milestone ends with tests green + a demo.
 - My orders list/detail with Farsi status labels; cancellation releases reservations.
 - `DELIVERY_FEE_RIAL` env setting; real-Postgres and end-to-end checkout tests.
 - 86 tests green; ruff and mypy clean.
-## M5 — Payments (pending)
+## M5 — Payments & wallet ✅
+
+**Done**
+- Unique-amount payment intents with expiry for orders and top-ups.
+- HMAC SMS webhook with device allow-list, raw-hash dedupe and masked storage;
+  Persian/English bank SMS parser.
+- Transactional matching: exact match settles, duplicate refs ignored, ambiguous
+  and unmatched payments alert admins; overpayment surplus goes to the wallet.
+- Receipt-upload fallback with admin approve/reject and customer notification.
+- Wallet ledger with idempotency keys, insufficient-funds guard and Farsi statements.
+- Alembic revision adds the `payment_overpay` ledger type.
+- 100 tests green; ruff and mypy clean.
 ## M6 — Admin panel (pending)
 ## M7 — Fulfillment (pending)
 ## M8 — Broadcast & polish (pending)

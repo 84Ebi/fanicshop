@@ -6,11 +6,18 @@ from copy import deepcopy
 
 from aiogram import Router
 
-from app.bot.handlers.user import menu, orders, shop, signup, start
+from app.bot.handlers.user import menu, orders, payments, shop, signup, start
 
 
 def build_router() -> Router:
     router = Router(name="user")
-    for child in (start.router, signup.router, shop.router, orders.router, menu.router):
+    for child in (
+        start.router,
+        signup.router,
+        shop.router,
+        orders.router,
+        payments.router,
+        menu.router,
+    ):
         router.include_router(deepcopy(child))
     return router

@@ -350,7 +350,3 @@ async def order_cancel(
     await _edit(callback, await _order_details(session, order), order_keyboard(order))
 
 
-@router.callback_query(F.data.startswith("pay:"))
-async def pay_entry(callback: CallbackQuery) -> None:
-    """Placeholder — M5 replaces this with the payment-method flow."""
-    await callback.answer(t("common.not_available"))

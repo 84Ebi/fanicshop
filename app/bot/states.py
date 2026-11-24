@@ -11,6 +11,14 @@ class Signup(StatesGroup):
     confirm = State()
 
 
+class PaymentFlow(StatesGroup):
+    receipt = State()
+
+
+class Topup(StatesGroup):
+    amount = State()
+
+
 class Checkout(StatesGroup):
     address = State()
     note = State()

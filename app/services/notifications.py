@@ -58,6 +58,17 @@ async def notify_user(bot: Bot, session: AsyncSession, user: User, text: str) ->
         return False
 
 
+async def notify_order_paid(
+    bot: Bot,
+    settings: Settings,
+    order_text: str,
+    *,
+    reply_markup: Any | None = None,
+) -> int:
+    """Notify admins that an order is ready to be prepared."""
+    return await notify_admins(bot, settings, order_text, reply_markup=reply_markup)
+
+
 async def notify_signup_admins(
     bot: Bot,
     settings: Settings,

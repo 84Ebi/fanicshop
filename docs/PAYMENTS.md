@@ -69,6 +69,19 @@ Inside **one database transaction**:
 | **Receipt only** | Proof photo → `pending`; admin approves (credits) or rejects (with reason); both notify customer. |
 | **Bank downtime / no forwarder** | Receipt fallback keeps the shop usable; admins get an alert when SMS ingestion has been silent too long. |
 
+## Implemented behaviour notes (M5)
+
+- The suffix is a random **Rial** value in `[SUFFIX_MIN_TOMAN*10, SUFFIX_MAX_TOMAN*10]`;
+  a partial unique index forbids two live intents sharing an amount.
+- If a customer transfers slightly more than the intent amount, the surplus is
+  credited to their wallet with ledger type `payment_overpay` (added in migration
+  `9c1d4e7a2b30`) instead of being silently discarded.
+- SMS webhook: `POST /internal/sms` with headers `X-SMS-Device-Id` and
+  `X-SMS-Signature` (HMAC-SHA256 of the raw body). Duplicate bodies are dropped by
+  a `raw_hash` unique key.
+- The admin can review receipts with `/proofs`; approving settles the intent,
+  rejecting cancels it and notifies the customer.
+
 ## Ledger rules
 
 - A `bank_transaction` row is created for **every** inbound SMS (even unmatched).

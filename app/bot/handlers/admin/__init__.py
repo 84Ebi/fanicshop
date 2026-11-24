@@ -6,7 +6,7 @@ from copy import deepcopy
 
 from aiogram import Router
 
-from app.bot.handlers.admin import users
+from app.bot.handlers.admin import payments, users
 from app.bot.middlewares.admin import AdminGuardMiddleware
 
 
@@ -17,4 +17,5 @@ def build_router() -> Router:
     # Handler modules expose module-level routers; copy them so multiple
     # dispatchers (tests, webhook + polling) can coexist in one process.
     router.include_router(deepcopy(users.router))
+    router.include_router(deepcopy(payments.router))
     return router

@@ -28,6 +28,7 @@ WALLET_TX_TYPES = (
     "admin_credit",
     "admin_debit",
     "adjustment",
+    "payment_overpay",
 )
 BROADCAST_STATUSES = ("draft", "queued", "running", "done", "cancelled", "failed")
 BROADCAST_TARGET_STATUSES = ("queued", "sent", "failed", "blocked")

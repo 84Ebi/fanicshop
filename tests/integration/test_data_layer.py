@@ -236,10 +236,11 @@ async def test_shop_card_bank_last4_unique(db_session: AsyncSession) -> None:
 async def test_default_address_partial_unique(db_session: AsyncSession) -> None:
     from app.db.models import Address
 
-    db_session.add(make_user())
+    user = make_user()
+    db_session.add(user)
     await db_session.flush()
     base = dict(
-        user_id=1,
+        user_id=user.id,
         receiver_name="گیرنده",
         receiver_phone="9123456789",
         province="تهران",

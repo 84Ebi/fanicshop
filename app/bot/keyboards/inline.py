@@ -175,6 +175,63 @@ def product_keyboard(product: Product) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
+def payment_method_keyboard(
+    order_id: int, balance_rial: int, total_rial: int
+) -> InlineKeyboardMarkup:
+    rows: list[list[InlineKeyboardButton]] = []
+    if balance_rial >= total_rial:
+        rows.append(
+            [InlineKeyboardButton(text=t("pay.by_wallet"), callback_data=f"pm:wallet:{order_id}")]
+        )
+    rows.append([InlineKeyboardButton(text=t("pay.by_card"), callback_data=f"pm:card:{order_id}")])
+    if 0 < balance_rial < total_rial:
+        rows.append(
+            [InlineKeyboardButton(text=t("pay.by_mixed"), callback_data=f"pm:mixed:{order_id}")]
+        )
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def payment_intent_keyboard(intent_id: int) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text=t("pay.receipt_button"), callback_data=f"pi:receipt:{intent_id}"
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text=t("pay.check_status"), callback_data=f"pi:status:{intent_id}"
+                )
+            ],
+        ]
+    )
+
+
+def wallet_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text=t("wallet.topup"), callback_data="wal:topup")],
+            [InlineKeyboardButton(text=t("wallet.history"), callback_data="wal:history")],
+        ]
+    )
+
+
+def proof_keyboard(proof_id: int) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text=t("admin.proof_approve"), callback_data=f"proof:ok:{proof_id}"
+                ),
+                InlineKeyboardButton(
+                    text=t("admin.proof_reject"), callback_data=f"proof:no:{proof_id}"
+                ),
+            ]
+        ]
+    )
+
+
 def address_keyboard(addresses: list[Address]) -> InlineKeyboardMarkup:
     rows = [
         [
@@ -216,7 +273,7 @@ def order_keyboard(order: Order) -> InlineKeyboardMarkup:
     rows: list[list[InlineKeyboardButton]] = []
     if order.status == "awaiting_payment":
         rows.append(
-            [InlineKeyboardButton(text="💳 پرداخت", callback_data=f"pay:{order.id}")]
+            [InlineKeyboardButton(text=t("pay.by_card"), callback_data=f"pay:{order.id}")]
         )
         rows.append(
             [InlineKeyboardButton(text=t("orders.cancel"), callback_data=f"oc:{order.id}")]

@@ -19,6 +19,7 @@ from pathlib import Path
 import asyncpg
 import pytest
 from sqlalchemy import text
+from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -54,27 +55,58 @@ def _alembic(*args: str) -> None:
         raise RuntimeError(f"alembic {' '.join(args)} failed:\n{result.stdout}\n{result.stderr}")
 
 
+async def _terminate_peers() -> None:
+    """Kill zombie connections (e.g. orphaned by a crashed pytest run) that
+    would otherwise block TRUNCATE and deadlock the suite."""
+    dsn = _to_asyncpg_dsn(TEST_URL)
+    base, dbname = dsn.rsplit("/", 1)
+    conn = await asyncpg.connect(f"{base}/postgres")
+    try:
+        await conn.execute(
+            "SELECT pg_terminate_backend(pid) FROM pg_stat_activity "
+            "WHERE datname = $1 AND pid <> pg_backend_pid()",
+            dbname,
+        )
+    finally:
+        await conn.close()
+
+
 async def truncate_all(engine) -> None:
-    """Remove test rows while keeping Alembic's version table."""
-    async with engine.begin() as conn:
-        names = ", ".join(
-            f'"{row[0]}"'
-            for row in (
-                await conn.execute(
-                    text(
-                        "SELECT tablename FROM pg_tables "
-                        "WHERE schemaname='public' AND tablename <> 'alembic_version'"
+    """Remove test rows while keeping Alembic's version table.
+
+    Retries because a concurrent test connection may momentarily hold a lock;
+    a deadlock here would otherwise poison the whole session's state.
+    """
+    last: Exception | None = None
+    for attempt in range(6):
+        try:
+            async with engine.begin() as conn:
+                names = ", ".join(
+                    f'"{row[0]}"'
+                    for row in (
+                        await conn.execute(
+                            text(
+                                "SELECT tablename FROM pg_tables "
+                                "WHERE schemaname='public' AND tablename <> 'alembic_version'"
+                            )
+                        )
                     )
                 )
-            )
-        )
-        if names:
-            await conn.execute(text(f"TRUNCATE {names} RESTART IDENTITY CASCADE"))
+                if names:
+                    await conn.execute(text(f"TRUNCATE {names} RESTART IDENTITY CASCADE"))
+            return
+        except (asyncpg.exceptions.DeadlockDetectedError, DBAPIError) as exc:
+            # The sandbox sometimes terminates idle cluster connections.
+            last = exc
+            await asyncio.sleep(0.25 * (attempt + 1))
+    assert last is not None
+    raise last
 
 
 @pytest.fixture(scope="session", autouse=True)
 def migrated_database() -> None:
     asyncio.run(_ensure_database())
+    asyncio.run(_terminate_peers())
     _alembic("upgrade", "head")
 
     # Clean slate: the test DB persists between pytest invocations, so earlier
@@ -93,6 +125,9 @@ def migrated_database() -> None:
 @pytest.fixture
 async def engine(migrated_database: None) -> AsyncIterator[object]:
     eng = create_async_engine(TEST_URL, poolclass=None)
+    # Every test starts from an empty database; several fixtures seed their own
+    # rows and rely on exact counts.
+    await truncate_all(eng)
     yield eng
     await eng.dispose()
 

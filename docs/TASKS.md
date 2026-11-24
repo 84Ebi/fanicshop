@@ -35,11 +35,11 @@ Status: `todo` | `in progress` | `done`. Tick `- [x]` only when the task file sa
 
 ## M5 — Payments & wallet (tag `v0.6.0-payments`)
 
-- [ ] `TASK-040` [Payment intents](tasks/TASK-040-payment-intents.md) — unique amount, expiry, card display. **todo**
-- [ ] `TASK-041` [SMS ingestion](tasks/TASK-041-sms-webhook.md) — HMAC endpoint, parser, device id. **todo**
-- [ ] `TASK-042` [Payment matching](tasks/TASK-042-matching.md) — amount match, partial, duplicate, late, expiry. **todo**
-- [ ] `TASK-043` [Receipt fallback](tasks/TASK-043-receipt-fallback.md) — photo upload → admin approval. **todo**
-- [ ] `TASK-044` [Wallet ledger](tasks/TASK-044-wallet.md) — top-up, pay, history, adjustments. **todo**
+- [x] `TASK-040` [Payment intents](tasks/TASK-040-payment-intents.md) — unique amount, expiry, card display. **done**
+- [x] `TASK-041` [SMS ingestion](tasks/TASK-041-sms-webhook.md) — HMAC endpoint, parser, device id. **done**
+- [x] `TASK-042` [Payment matching](tasks/TASK-042-matching.md) — amount match, partial, duplicate, late, expiry. **done**
+- [x] `TASK-043` [Receipt fallback](tasks/TASK-043-receipt-fallback.md) — photo upload → admin approval. **done**
+- [x] `TASK-044` [Wallet ledger](tasks/TASK-044-wallet.md) — top-up, pay, history, adjustments. **done**
 
 ## M6 — Admin panel (tag `v1.0.0-mvp`)
 
