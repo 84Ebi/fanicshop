@@ -11,10 +11,10 @@ Status: `todo` | `in progress` | `done`. Tick `- [x]` only when the task file sa
 - [x] `TASK-001` [User & address models](tasks/TASK-001-user-models.md) — users, events, addresses with status constraints. **done**
 - [x] `TASK-002` [Catalog & cart models](tasks/TASK-002-catalog-models.md) — categories, products, images, carts, cart items. **done**
 - [x] `TASK-003` [Order models](tasks/TASK-003-order-models.md) — orders, immutable items, status history. **done**
-- [ ] `TASK-004` [Payment models](tasks/TASK-004-payment-models.md) — intents, SMS, bank tx, proofs, cards. **in progress**
-- [ ] `TASK-005` [Ops models](tasks/TASK-005-ops-models.md) — wallet ledger, audit, broadcast, support, jobs, settings. **todo**
-- [ ] `TASK-006` [Alembic migrations](tasks/TASK-006-alembic-migrations.md) — initial revision, upgrade/downgrade on Postgres. **todo**
-- [ ] `TASK-007` [Data layer tests](tasks/TASK-007-data-tests.md) — constraints, relationships, ledger invariants. **todo**
+- [x] `TASK-004` [Payment models](tasks/TASK-004-payment-models.md) — intents, SMS, bank tx, proofs, cards. **done**
+- [x] `TASK-005` [Ops models](tasks/TASK-005-ops-models.md) — wallet ledger, audit, broadcast, support, jobs, settings. **done**
+- [x] `TASK-006` [Alembic migrations](tasks/TASK-006-alembic-migrations.md) — initial revision, upgrade/downgrade on Postgres. **done**
+- [x] `TASK-007` [Data layer tests](tasks/TASK-007-data-tests.md) — constraints, relationships, ledger invariants. **done**
 
 ## M2 — Signup & verification (tag `v0.3.0-signup`)
 

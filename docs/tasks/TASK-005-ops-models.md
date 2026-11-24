@@ -1,6 +1,6 @@
 # TASK-005 — Ops models
 
-**Status:** todo
+**Status:** done
 
 ## Description
 Wallet ledger, admin audit log, broadcast, support threads and misc runtime tables.
@@ -22,4 +22,4 @@ Money movements and administrative actions are append-only and explainable.
 Insert ledger rows and assert balance_after arithmetic; insert broadcast and targets.
 
 ## Final status
-todo.
+done.

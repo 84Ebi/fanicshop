@@ -2,9 +2,9 @@ services:
   postgres:
     image: postgres:16
     environment:
-      POSTGRES_USER: fanic
-      POSTGRES_PASSWORD: fanic
-      POSTGRES_DB: fanic
+      POSTGRES_USER: ${POSTGRES_USER:-fanic}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-fanic}
+      POSTGRES_DB: ${POSTGRES_DB:-fanic}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:

@@ -1,6 +1,6 @@
 # TASK-007 — Data layer tests
 
-**Status:** todo
+**Status:** done
 
 ## Description
 Integration tests against a real temporary PostgreSQL cluster.
@@ -21,4 +21,4 @@ Prove constraints, relationships and ledger invariants hold under real DB semant
 `UV_NO_CONFIG=1 uv run pytest -q` → all green (integration tests skipped if no Postgres).
 
 ## Final status
-todo.
+done.

@@ -48,7 +48,14 @@ Log of milestone completion. Each milestone ends with tests green + a demo.
   socket `.pgsock/`, data `.pgtest/`). Test DB `fanic_test` is auto-created and
   migrated by `tests/conftest.py`.
 
-## M2 — Signup & verification (pending)
+## M2 — Signup & verification (in progress)
+
+- Backfilled required docs (PLAN/TASKS/task files/ARCHITECTURE/DATABASE/PAYMENTS/
+  DECISIONS/CHANGELOG/legal notes).
+- Added Farsi locale + digit/name/phone helpers (TASK-010).
+- Fixed `SMS_DEVICE_IDS` parsing, Docker migration/locales paths, env-ified
+  Postgres credentials, ruff `zip(strict=)`.
+
 ## M3 — Catalog & cart (pending)
 ## M4 — Checkout & orders (pending)
 ## M5 — Payments (pending)

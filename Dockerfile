@@ -26,8 +26,9 @@ ENV PATH="/app/.venv/bin:$PATH" \
     PYTHONUNBUFFERED=1
 COPY --from=builder /app/.venv /app/.venv
 COPY app ./app
-COPY locales ./locales
-# alembic + migrations are added at M1; keep the dir present for now.
+COPY migrations ./migrations
+COPY alembic.ini ./alembic.ini
+COPY scripts ./scripts
 COPY .env.example ./.env.example
 USER 10001:10001
 EXPOSE 8080

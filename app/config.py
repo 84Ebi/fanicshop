@@ -27,6 +27,16 @@ def _parse_int_list(raw: object) -> list[int]:
     return []
 
 
+def _parse_str_list(raw: object) -> list[str]:
+    if raw is None or raw == "":
+        return []
+    if isinstance(raw, list):
+        return [str(x) for x in raw]
+    if isinstance(raw, str):
+        return [x.strip() for x in raw.split(",") if x.strip()]
+    return []
+
+
 def _parse_roles(raw: object) -> dict[str, str]:
     if raw is None or raw == "":
         return {}
@@ -92,10 +102,15 @@ class Settings(BaseSettings):
     http_port: int = 8080
 
     # pydantic-settings v2 wants a validator to turn comma lists into lists
-    @field_validator("admin_ids", "sms_device_ids", mode="before")
+    @field_validator("admin_ids", mode="before")
     @classmethod
     def _split_int_list(cls, v: object) -> object:
         return _parse_int_list(v)
+
+    @field_validator("sms_device_ids", mode="before")
+    @classmethod
+    def _split_str_list(cls, v: object) -> object:
+        return _parse_str_list(v)
 
     @field_validator("admin_roles", mode="before")
     @classmethod

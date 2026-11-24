@@ -1,6 +1,6 @@
 # TASK-004 — Payment models
 
-**Status:** in progress
+**Status:** done
 
 ## Description
 Payment intents, forwarded SMS messages, parsed bank transactions, shop cards, receipts and card bindings.
@@ -31,4 +31,4 @@ Create intent + SMS + bank transaction; assert unique reference prevents a secon
 states enumerated correctly.
 
 ## Final status
-in progress.
+done.
