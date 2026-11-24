@@ -34,6 +34,18 @@ class NewAddress(StatesGroup):
     postal = State()
 
 
+class AdminProduct(StatesGroup):
+    category_slug = State()
+    category_title = State()
+    title = State()
+    description = State()
+    price = State()
+    stock = State()
+    photo = State()
+    new_price = State()
+    new_stock = State()
+
+
 class AdminUserFlow(StatesGroup):
     reject_reason = State()
     block_reason = State()

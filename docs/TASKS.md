@@ -43,12 +43,12 @@ Status: `todo` | `in progress` | `done`. Tick `- [x]` only when the task file sa
 
 ## M6 — Admin panel (tag `v1.0.0-mvp`)
 
-- [ ] `TASK-050` [Admin guard & menu](tasks/TASK-050-admin-guard.md) — ID/role gating, panel entry. **todo**
-- [ ] `TASK-051` [User management](tasks/TASK-051-admin-users.md) — pending list, approve/reject/block, details. **todo**
-- [ ] `TASK-052` [Product management](tasks/TASK-052-admin-products.md) — CRUD, price, stock, photos, categories. **todo**
-- [ ] `TASK-053` [Order management](tasks/TASK-053-admin-orders.md) — list/filter by status, status update. **todo**
-- [ ] `TASK-054` [Payment log](tasks/TASK-054-admin-payments.md) — log view, manual approval. **todo**
-- [ ] `TASK-055` [Wallet adjustments](tasks/TASK-055-admin-wallet.md) — manual credit/debit with reason. **todo**
+- [x] `TASK-050` [Admin guard & menu](tasks/TASK-050-admin-guard.md) — ID/role gating, panel entry. **done**
+- [x] `TASK-051` [User management](tasks/TASK-051-admin-users.md) — pending list, approve/reject/block, details. **done**
+- [x] `TASK-052` [Product management](tasks/TASK-052-admin-products.md) — CRUD, price, stock, photos, categories. **done**
+- [x] `TASK-053` [Order management](tasks/TASK-053-admin-orders.md) — list/filter by status, status update. **done**
+- [x] `TASK-054` [Payment log](tasks/TASK-054-admin-payments.md) — log view, manual approval. **done**
+- [x] `TASK-055` [Wallet adjustments](tasks/TASK-055-admin-wallet.md) — manual credit/debit with reason. **done**
 
 ## M7 — Fulfillment (tag `v1.1.0-fulfillment`)
 

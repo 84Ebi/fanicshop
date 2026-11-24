@@ -10,6 +10,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import Address, Cart, Order, OrderItem, OrderStatusHistory, Product
+from app.db.models.orders import ORDER_STATUSES
 from app.services.cart import list_items, subtotal
 from app.services.catalog import available
 from app.utils.names import normalize_name
@@ -248,6 +249,32 @@ async def list_orders(session: AsyncSession, user_id: int, *, limit: int = 20) -
             .limit(limit)
         )
     )
+
+
+async def set_order_status(
+    session: AsyncSession, order: Order, status: str, *, actor_telegram_id: int | None = None
+) -> bool:
+    """Admin-driven status change with a history row. Returns True if changed."""
+    if status not in ORDER_STATUSES or status == order.status:
+        return False
+    previous = order.status
+    order.status = status
+    if status == "shipped":
+        order.shipped_at = datetime.now(UTC)
+    elif status == "delivered":
+        order.delivered_at = datetime.now(UTC)
+    elif status == "cancelled":
+        order.cancelled_at = datetime.now(UTC)
+    _history(
+        session,
+        order,
+        to_status=status,
+        source="admin",
+        actor_telegram_id=actor_telegram_id,
+        from_status=previous,
+    )
+    await session.flush()
+    return True
 
 
 async def cancel_order(

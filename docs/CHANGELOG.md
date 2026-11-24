@@ -2,7 +2,14 @@
 
 ## Unreleased
 
-- Next: M6 admin panel.
+- Next: M7 fulfillment notifications / M8 extras / M9 deploy hardening.
+
+## v1.0.0-mvp (2026-11-24)
+
+- MVP complete: signup, catalog/cart, checkout/orders, payments/wallet and the
+  full in-bot admin panel.
+- Admin product management, order status management, payment log, receipt review
+  and wallet adjustments with audit trail.
 
 ## v0.6.0-payments (2026-11-24)
 

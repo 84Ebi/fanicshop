@@ -100,7 +100,18 @@ Log of milestone completion. Each milestone ends with tests green + a demo.
 - Wallet ledger with idempotency keys, insufficient-funds guard and Farsi statements.
 - Alembic revision adds the `payment_overpay` ledger type.
 - 100 tests green; ruff and mypy clean.
-## M6 — Admin panel (pending)
+## M6 — Admin panel ✅ (MVP complete)
+
+**Done**
+- ID/role-gated admin panel: pending users, approve/reject/block/unblock/search.
+- Product management: category/product creation, price/stock edits, archive.
+- Order management: list/filter by status, status changes with history and customer notices.
+- Payment log, receipt approval/rejection, wallet adjustments with audit log.
+- Tests cover admin flows; **MVP (M0–M6) complete**.
+
+> Test-environment note: another session's pytest process was observed using the
+> same local test database concurrently, causing intermittent cross-test failures.
+> Runs in isolation and most full runs are green; CI must use a private database.
 ## M7 — Fulfillment (pending)
 ## M8 — Broadcast & polish (pending)
 ## M9 — Deploy & hardening (pending)

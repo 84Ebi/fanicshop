@@ -67,4 +67,5 @@ Unit and end-to-end handler tests use a fake Telegram transport.
 `docs/ARCHITECTURE.md`, `docs/DATABASE.md`, `docs/PAYMENTS.md`,
 `docs/DECISIONS.md`, `docs/CHANGELOG.md`, `docs/legal-notes.fa.md`.
 
-Current milestone: **M5 payments & wallet** (tag `v0.6.0-payments`).
+Current milestone: **MVP complete** (tag `v1.0.0-mvp`). Next: M7 fulfillment,
+M8 broadcast/reports, M9 deploy hardening.
