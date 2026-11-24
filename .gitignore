@@ -20,4 +20,7 @@ htmlcov/
 
 # local data
 pgdata/
+.pgtest/
+.pgsock/
+.pglog.txt
 *.log

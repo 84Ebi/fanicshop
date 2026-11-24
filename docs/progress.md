@@ -29,7 +29,25 @@ Log of milestone completion. Each milestone ends with tests green + a demo.
 - No `redis-server` on host. Redis-dependent code must degrade gracefully
   (in-memory FSM/storage fallback) and be skipped when Redis is absent.
 
-## M1 — Data layer (pending)
+## M1 — Data layer ✅
+
+**Done**
+- All ORM models (`users/addresses`, `catalog/cart`, `orders`, `payments`,
+  `wallet/audit/broadcast/support/jobs/settings`) with money-safe constraints:
+  order total math, stock/reserved bounds, cart qty 1–20, wallet non-negative,
+  `UNIQUE(idempotency_key)`, `UNIQUE(bank_code, ref_number)` partial,
+  live-intent unique amount + one-live-intent-per-order partial indexes.
+- Alembic async setup (`migrations/env.py`), initial migration; verified
+  `upgrade → downgrade base → upgrade` clean (26 tables).
+- `scripts/seed_demo.py` (idempotent: 3 categories / 6 neutral demo products /
+  6 settings) and `scripts/check_ledger.py` (wallet invariant, exit 1 on drift).
+- 18 tests green, including real-Postgres constraint tests: double-credit
+  guard, expired intent frees its amount, ref-number dedupe, default-address
+  partial unique, ledger sum == balance.
+- Local test cluster: PostgreSQL 18 at `127.0.0.1:55432` (superuser `fanic`,
+  socket `.pgsock/`, data `.pgtest/`). Test DB `fanic_test` is auto-created and
+  migrated by `tests/conftest.py`.
+
 ## M2 — Signup & verification (pending)
 ## M3 — Catalog & cart (pending)
 ## M4 — Checkout & orders (pending)
