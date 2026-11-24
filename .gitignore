@@ -1,0 +1,23 @@
+# Secrets / local config
+.env
+.env.*
+!.env.example
+
+# uv / python
+.uv-cache/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# local data
+pgdata/
+*.log
