@@ -78,7 +78,16 @@ Log of milestone completion. Each milestone ends with tests green + a demo.
 - Inline navigation and cart controls; fake-transport end-to-end flow
   (category → product → add → qty → view cart → remove).
 - 74 tests green; ruff and mypy clean.
-## M4 — Checkout & orders (pending)
+## M4 — Checkout & orders ✅
+
+**Done**
+- Address creation/selection with Iranian phone and name validation; delivery note
+  with skip button.
+- Order creation locks products, re-checks available stock, reserves units, snapshots
+  titles/prices/address, clears the cart and appends status history.
+- My orders list/detail with Farsi status labels; cancellation releases reservations.
+- `DELIVERY_FEE_RIAL` env setting; real-Postgres and end-to-end checkout tests.
+- 86 tests green; ruff and mypy clean.
 ## M5 — Payments (pending)
 ## M6 — Admin panel (pending)
 ## M7 — Fulfillment (pending)

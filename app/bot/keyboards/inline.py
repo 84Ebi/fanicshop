@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-from app.db.models import CartItem, Category, Product, User
+from app.db.models import Address, CartItem, Category, Order, Product, User
 from app.i18n import t
 
 
@@ -172,6 +172,55 @@ def product_keyboard(product: Product) -> InlineKeyboardMarkup:
             )
         ]
     )
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def address_keyboard(addresses: list[Address]) -> InlineKeyboardMarkup:
+    rows = [
+        [
+            InlineKeyboardButton(
+                text=f"{a.province} - {a.city} - {a.address_line[:24]}",
+                callback_data=f"addr:{a.id}",
+            )
+        ]
+        for a in addresses
+    ]
+    rows.append([InlineKeyboardButton(text=t("checkout.new_address"), callback_data="addr:new")])
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def checkout_confirm_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text=t("checkout.place_order"), callback_data="co:ok"),
+                InlineKeyboardButton(text=t("common.cancel"), callback_data="co:cancel"),
+            ]
+        ]
+    )
+
+
+def orders_keyboard(orders: list[Order]) -> InlineKeyboardMarkup:
+    rows = [
+        [InlineKeyboardButton(text=f"{o.public_code}", callback_data=f"o:{o.id}")]
+        for o in orders
+    ]
+    return (
+        InlineKeyboardMarkup(inline_keyboard=rows)
+        if rows
+        else InlineKeyboardMarkup(inline_keyboard=[])
+    )
+
+
+def order_keyboard(order: Order) -> InlineKeyboardMarkup:
+    rows: list[list[InlineKeyboardButton]] = []
+    if order.status == "awaiting_payment":
+        rows.append(
+            [InlineKeyboardButton(text="💳 پرداخت", callback_data=f"pay:{order.id}")]
+        )
+        rows.append(
+            [InlineKeyboardButton(text=t("orders.cancel"), callback_data=f"oc:{order.id}")]
+        )
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 

@@ -30,8 +30,8 @@ Status: `todo` | `in progress` | `done`. Tick `- [x]` only when the task file sa
 
 ## M4 — Checkout & orders (tag `v0.5.0-orders`)
 
-- [ ] `TASK-030` [Address & notes](tasks/TASK-030-address.md) — saved addresses, create, select, delivery note. **todo**
-- [ ] `TASK-031` [Order creation](tasks/TASK-031-orders.md) — stock reservation, snapshots, status history, my orders. **todo**
+- [x] `TASK-030` [Address & notes](tasks/TASK-030-address.md) — saved addresses, create, select, delivery note. **done**
+- [x] `TASK-031` [Order creation](tasks/TASK-031-orders.md) — stock reservation, snapshots, status history, my orders. **done**
 
 ## M5 — Payments & wallet (tag `v0.6.0-payments`)
 

@@ -90,6 +90,7 @@ class Settings(BaseSettings):
     store_raw_sms: bool = False
 
     # ── Payment policies ──────────────────────────────────────────────────
+    delivery_fee_rial: int = 0
     payment_window_minutes: int = 15
     suffix_min_toman: int = 1
     suffix_max_toman: int = 999

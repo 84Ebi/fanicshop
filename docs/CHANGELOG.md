@@ -2,7 +2,14 @@
 
 ## Unreleased
 
-- Next: M4 checkout & orders.
+- Next: M5 payments & wallet.
+
+## v0.5.0-orders (2026-11-24)
+
+- Address wizard with validation and delivery notes.
+- Atomic order creation with stock reservation, immutable item snapshots and
+  status history; my orders and cancellation.
+- 86 tests green, ruff/mypy clean.
 
 ## v0.4.0-catalog (2026-11-24)
 
