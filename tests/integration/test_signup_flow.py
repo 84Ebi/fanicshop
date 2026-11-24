@@ -15,6 +15,7 @@ from app.bot.setup import build_dispatcher
 from app.config import Settings
 from app.db.models import User, UserEvent
 from app.services.users import get_by_telegram_id
+from tests.conftest import truncate_all
 from tests.fakes import FakeSession, callback_update, make_message, message_update
 
 USER_ID = 5001
@@ -38,6 +39,7 @@ async def env(engine, migrated_database):
     dp = await build_dispatcher(settings, factory, storage=MemoryStorage())
     yield SimpleNamespace(dp=dp, bot=bot, fake=fake, factory=factory, settings=settings)
     await bot.session.close()
+    await truncate_all(engine)
 
 
 async def _feed(env, update) -> None:

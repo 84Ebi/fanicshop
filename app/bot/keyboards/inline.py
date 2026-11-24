@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-from app.db.models import User
+from app.db.models import CartItem, Category, Product, User
 from app.i18n import t
 
 
@@ -132,3 +132,61 @@ def back_to_panel_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[[InlineKeyboardButton(text=t("common.back"), callback_data="adm:panel")]]
     )
+
+
+# ── Catalog & cart ──────────────────────────────────────────────────────────
+
+
+def categories_keyboard(categories: list[Category]) -> InlineKeyboardMarkup:
+    rows = [
+        [InlineKeyboardButton(text=cat.title_fa, callback_data=f"cat:{cat.id}")]
+        for cat in categories
+    ]
+    return (
+        InlineKeyboardMarkup(inline_keyboard=rows)
+        if rows
+        else InlineKeyboardMarkup(inline_keyboard=[])
+    )
+
+
+def products_keyboard(products: list[Product], category_id: int) -> InlineKeyboardMarkup:
+    rows = [
+        [InlineKeyboardButton(text=p.title_fa, callback_data=f"p:{p.id}")]
+        for p in products
+        if (p.stock_qty - p.reserved_qty) > 0
+    ]
+    rows.append([InlineKeyboardButton(text=t("catalog.back_categories"), callback_data="cats")])
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def product_keyboard(product: Product) -> InlineKeyboardMarkup:
+    rows: list[list[InlineKeyboardButton]] = []
+    if (product.stock_qty - product.reserved_qty) > 0:
+        rows.append(
+            [InlineKeyboardButton(text=t("catalog.add"), callback_data=f"a:{product.id}")]
+        )
+    rows.append(
+        [
+            InlineKeyboardButton(
+                text=t("catalog.back_products"), callback_data=f"cat:{product.category_id}"
+            )
+        ]
+    )
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def cart_keyboard(items: list[CartItem]) -> InlineKeyboardMarkup:
+    rows: list[list[InlineKeyboardButton]] = []
+    for item in items:
+        rows.append(
+            [
+                InlineKeyboardButton(text=t("cart.minus"), callback_data=f"q:{item.id}:-1"),
+                InlineKeyboardButton(text=str(item.qty), callback_data="noop"),
+                InlineKeyboardButton(text=t("cart.plus"), callback_data=f"q:{item.id}:1"),
+                InlineKeyboardButton(text=t("cart.remove"), callback_data=f"d:{item.id}"),
+            ]
+        )
+    if items:
+        rows.append([InlineKeyboardButton(text=t("cart.checkout"), callback_data="checkout")])
+        rows.append([InlineKeyboardButton(text=t("cart.clear"), callback_data="cc")])
+    return InlineKeyboardMarkup(inline_keyboard=rows)

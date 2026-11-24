@@ -54,10 +54,40 @@ def _alembic(*args: str) -> None:
         raise RuntimeError(f"alembic {' '.join(args)} failed:\n{result.stdout}\n{result.stderr}")
 
 
+async def truncate_all(engine) -> None:
+    """Remove test rows while keeping Alembic's version table."""
+    async with engine.begin() as conn:
+        names = ", ".join(
+            f'"{row[0]}"'
+            for row in (
+                await conn.execute(
+                    text(
+                        "SELECT tablename FROM pg_tables "
+                        "WHERE schemaname='public' AND tablename <> 'alembic_version'"
+                    )
+                )
+            )
+        )
+        if names:
+            await conn.execute(text(f"TRUNCATE {names} RESTART IDENTITY CASCADE"))
+
+
 @pytest.fixture(scope="session", autouse=True)
 def migrated_database() -> None:
     asyncio.run(_ensure_database())
     _alembic("upgrade", "head")
+
+    # Clean slate: the test DB persists between pytest invocations, so earlier
+    # runs can leave rows (e.g. a user whose age is already confirmed) that make
+    # env-level tests non-deterministic. Start empty every time.
+    async def _clean() -> None:
+        eng = create_async_engine(TEST_URL, poolclass=None)
+        try:
+            await truncate_all(eng)
+        finally:
+            await eng.dispose()
+
+    asyncio.run(_clean())
 
 
 @pytest.fixture
@@ -75,13 +105,4 @@ async def db_session(engine) -> AsyncIterator[AsyncSession]:
         await session.rollback()
 
     # Clean slate for the next test (keep alembic_version).
-    async with engine.begin() as conn:
-        tables = await conn.execute(
-            text(
-                "SELECT tablename FROM pg_tables "
-                "WHERE schemaname='public' AND tablename <> 'alembic_version'"
-            )
-        )
-        names = ", ".join(f'"{row[0]}"' for row in tables)
-        if names:
-            await conn.execute(text(f"TRUNCATE {names} RESTART IDENTITY CASCADE"))
+    await truncate_all(engine)

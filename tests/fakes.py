@@ -33,8 +33,9 @@ class FakeSession(BaseSession):
             data = call["data"]
             if chat_id is not None and data.get("chat_id") != chat_id:
                 continue
-            if data.get("text"):
-                out.append(data["text"])
+            text = data.get("text") or data.get("caption")
+            if text:
+                out.append(text)
         return out
 
     def last_call(self, method: str) -> dict[str, Any] | None:
@@ -79,6 +80,15 @@ class FakeSession(BaseSession):
                 chat=Chat(id=chat_id, type="private"),
                 from_user=User(id=bot.id, is_bot=True, first_name="Test Bot"),
                 text=data.get("text"),
+            )
+        if name == "SendPhoto":
+            chat_id = int(data["chat_id"])
+            return Message(
+                message_id=self._next_id(),
+                date=datetime.now(UTC),
+                chat=Chat(id=chat_id, type="private"),
+                from_user=User(id=bot.id, is_bot=True, first_name="Test Bot"),
+                caption=data.get("caption"),
             )
         if name == "EditMessageText":
             chat_id = int(data["chat_id"])
