@@ -30,6 +30,8 @@ COPY migrations ./migrations
 COPY alembic.ini ./alembic.ini
 COPY scripts ./scripts
 COPY .env.example ./.env.example
+COPY scripts/entrypoint.sh ./entrypoint.sh
+RUN chmod +x ./entrypoint.sh
 USER 10001:10001
 EXPOSE 8080
-CMD ["python", "-m", "app.main"]
+CMD ["./entrypoint.sh"]

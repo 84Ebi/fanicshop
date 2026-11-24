@@ -67,4 +67,32 @@ Unit and end-to-end handler tests use a fake Telegram transport.
 `docs/ARCHITECTURE.md`, `docs/DATABASE.md`, `docs/PAYMENTS.md`,
 `docs/DECISIONS.md`, `docs/CHANGELOG.md`, `docs/legal-notes.fa.md`.
 
-Current milestone: **M8 extras** (tag `v1.2.0-extras`). Next: M9 deploy/hardening.
+## Deployment (VPS)
+
+1. Point a domain at the VPS if you want webhook mode; otherwise long polling
+   works with no domain or TLS.
+2. `cp .env.example .env` and fill in **all** secrets, especially `BOT_TOKEN`,
+   `ADMIN_IDS`, `SHOP_CARD_NUMBER`, `SMS_HMAC_SECRET` and `SMS_DEVICE_IDS`.
+   Revoke any token that was ever pasted into a chat.
+3. `docker compose up -d --build`. The bot container runs `alembic upgrade head`
+   on every start before launching the process (idempotent).
+4. `curl https://<host>:8080/healthz` → `{"status":"ok","db":"ok"}`.
+5. For webhook mode set `BOT_MODE=webhook`, `WEBHOOK_BASE_URL=https://…` and
+   `WEBHOOK_SECRET=<random>`; Telegram updates arrive at
+   `POST /telegram/<WEBHOOK_SECRET>`. For polling keep `BOT_MODE=polling`.
+6. Back up the PostgreSQL volume (`pgdata`) on a schedule; the wallet ledger and
+   order history are the source of truth.
+
+### Admin commands
+
+- `/admin` — verification queue, user search, approve/reject/block/unblock.
+- `/products` — categories and product CRUD (price in Toman, stock, photo).
+- `/orders` — filter orders by status and change their status.
+- `/payments`, `/proofs` — payment log and receipt review.
+- `/credit <user_id> <toman> <reason>` — manual wallet adjustment (owner only).
+- `/broadcast` — message all verified users.
+- `/report` — basic sales figures.
+- `/reply <user_id> <text>` — answer a support message.
+
+Current milestone: **complete** — MVP plus fulfillment, extras and hardening
+(tag `v1.3.0`).

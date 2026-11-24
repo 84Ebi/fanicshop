@@ -59,9 +59,9 @@ Status: `todo` | `in progress` | `done`. Tick `- [x]` only when the task file sa
 
 - [x] `TASK-070` [Broadcast](tasks/TASK-070-broadcast.md) — verified users only, progress + log. **done**
 - [x] `TASK-071` [Reports & support](tasks/TASK-071-reports.md) — sales reports, support threads. **done**
-- [ ] `TASK-072` [Hardening pass](tasks/TASK-072-hardening.md) — validation, rate limits, admin alerts. **todo**
+- [x] `TASK-072` [Hardening pass](tasks/TASK-072-hardening.md) — validation, rate limits, admin alerts. **done**
 
 ## M9 — Deploy (tag `v1.3.0`)
 
-- [ ] `TASK-080` [Deployment docs](tasks/TASK-080-deploy.md) — VPS setup, env, webhook/polling switch. **todo**
-- [ ] `TASK-081` [Monitoring](tasks/TASK-081-monitoring.md) — health, error alerts, backups. **todo**
+- [x] `TASK-080` [Deployment docs](tasks/TASK-080-deploy.md) — VPS setup, env, webhook/polling switch. **done**
+- [x] `TASK-081` [Monitoring](tasks/TASK-081-monitoring.md) — health, error alerts, backups. **done**

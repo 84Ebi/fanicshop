@@ -2,7 +2,12 @@
 
 ## Unreleased
 
-- Next: M9 deploy & hardening.
+- None — all planned milestones are complete.
+
+## v1.3.0 (2026-11-24)
+
+- Migration-on-start entrypoint, VPS/webhook deployment docs, global error alerts.
+- Hardening pass: validation, rate limits and ledger checks.
 
 ## v1.2.0-extras (2026-11-24)
 

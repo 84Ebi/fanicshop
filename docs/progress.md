@@ -123,4 +123,8 @@ Log of milestone completion. Each milestone ends with tests green + a demo.
 - `/broadcast` to verified users only, with per-user delivery rows.
 - `/report` sales summary and customer support with admin replies.
 - 104 tests green; ruff and mypy clean.
-## M9 — Deploy & hardening (pending)
+## M9 — Deploy & hardening ✅
+
+- Migration entrypoint in Docker, non-root runtime, VPS/webhook docs.
+- Global error alerts, rate limiting, validation and ledger checker.
+- Project complete: all milestones merged and tagged through `v1.3.0`.

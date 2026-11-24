@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
+
 from aiogram import Dispatcher
 from aiogram.fsm.storage.base import BaseStorage
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.bot.handlers.admin import build_router as build_admin_router
+from app.bot.handlers.errors import router as error_router
 from app.bot.handlers.user import build_router as build_user_router
 from app.bot.middlewares.db import DbSessionMiddleware
 from app.bot.middlewares.rate_limit import RateLimiter, RateLimitMiddleware
@@ -28,4 +31,5 @@ async def build_dispatcher(
     dp.update.outer_middleware(UserMiddleware(settings))
     dp.include_router(build_admin_router())
     dp.include_router(build_user_router())
+    dp.include_router(deepcopy(error_router))
     return dp

@@ -98,6 +98,7 @@ async def truncate_all(engine) -> None:
         except (asyncpg.exceptions.DeadlockDetectedError, DBAPIError) as exc:
             # The sandbox sometimes terminates idle cluster connections.
             last = exc
+            await _terminate_peers()
             await asyncio.sleep(0.25 * (attempt + 1))
     assert last is not None
     raise last

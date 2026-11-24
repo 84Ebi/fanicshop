@@ -241,5 +241,6 @@
   "support.ask": "پیام خود را بنویسید:",
   "support.sent": "✅ پیام شما به پشتیبانی ارسال شد.",
   "support.new": "💬 پیام پشتیبانی از {name} ({id}):\n{text}",
-  "support.reply_usage": "استفاده: /reply <user_id> <متن>"
+  "support.reply_usage": "استفاده: /reply <user_id> <متن>",
+  "alert.critical": "🚨 خطای بحرانی در ربات: {error}\nلطفاً لاگها را بررسی کنید."
 }
