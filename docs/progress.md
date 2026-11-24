@@ -118,5 +118,9 @@ Log of milestone completion. Each milestone ends with tests green + a demo.
 - Admin status changes add history rows and notify the customer with a
   receipt-confirmation button; confirmations are timestamped.
 - 104 tests green; ruff and mypy clean.
-## M8 — Broadcast & polish (pending)
+## M8 — Broadcast & polish ✅
+
+- `/broadcast` to verified users only, with per-user delivery rows.
+- `/report` sales summary and customer support with admin replies.
+- 104 tests green; ruff and mypy clean.
 ## M9 — Deploy & hardening (pending)

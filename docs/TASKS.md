@@ -57,8 +57,8 @@ Status: `todo` | `in progress` | `done`. Tick `- [x]` only when the task file sa
 
 ## M8 — Extras (tag `v1.2.0-extras`)
 
-- [ ] `TASK-070` [Broadcast](tasks/TASK-070-broadcast.md) — verified users only, progress + log. **todo**
-- [ ] `TASK-071` [Reports & support](tasks/TASK-071-reports.md) — sales reports, support threads. **todo**
+- [x] `TASK-070` [Broadcast](tasks/TASK-070-broadcast.md) — verified users only, progress + log. **done**
+- [x] `TASK-071` [Reports & support](tasks/TASK-071-reports.md) — sales reports, support threads. **done**
 - [ ] `TASK-072` [Hardening pass](tasks/TASK-072-hardening.md) — validation, rate limits, admin alerts. **todo**
 
 ## M9 — Deploy (tag `v1.3.0`)

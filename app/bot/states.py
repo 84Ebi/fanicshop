@@ -34,6 +34,14 @@ class NewAddress(StatesGroup):
     postal = State()
 
 
+class AdminBroadcast(StatesGroup):
+    text = State()
+
+
+class SupportFlow(StatesGroup):
+    message = State()
+
+
 class AdminProduct(StatesGroup):
     category_slug = State()
     category_title = State()

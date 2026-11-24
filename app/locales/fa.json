@@ -230,5 +230,16 @@
   "admin.delivered_button": "✅ تحویل داده شد",
   "notify.delivered_ask": "📦 سفارش شما ارسال/تحویل داده شد. لطفاً دریافت خود را تأیید کنید.",
   "orders.confirm_receipt": "✅ تأیید دریافت",
-  "orders.confirmed": "✅ ممنون! دریافت سفارش تأیید شد."
+  "orders.confirmed": "✅ ممنون! دریافت سفارش تأیید شد.",
+  "admin.broadcast_ask": "متن پیام همگانی را ارسال کنید:",
+  "admin.broadcast_done": "✅ پیام به {count} کاربر ارسال شد.",
+  "admin.broadcast_empty": "هیچ کاربر تأییدشده‌ای برای ارسال وجود ندارد.",
+  "admin.report_title": "📊 گزارش فروش",
+  "admin.report_orders": "کل سفارشها: {count}",
+  "admin.report_paid": "سفارشهای پرداختشده: {count}",
+  "admin.report_revenue": "درآمد: {amount}",
+  "support.ask": "پیام خود را بنویسید:",
+  "support.sent": "✅ پیام شما به پشتیبانی ارسال شد.",
+  "support.new": "💬 پیام پشتیبانی از {name} ({id}):\n{text}",
+  "support.reply_usage": "استفاده: /reply <user_id> <متن>"
 }

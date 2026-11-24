@@ -6,7 +6,7 @@ from copy import deepcopy
 
 from aiogram import Router
 
-from app.bot.handlers.admin import payments, shop, users
+from app.bot.handlers.admin import extras, payments, shop, users
 from app.bot.middlewares.admin import AdminGuardMiddleware
 
 
@@ -19,4 +19,5 @@ def build_router() -> Router:
     router.include_router(deepcopy(users.router))
     router.include_router(deepcopy(payments.router))
     router.include_router(deepcopy(shop.router))
+    router.include_router(deepcopy(extras.admin_router))
     return router

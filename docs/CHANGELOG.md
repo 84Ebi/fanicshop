@@ -2,7 +2,11 @@
 
 ## Unreleased
 
-- Next: M8 broadcast/reports, M9 deploy/hardening.
+- Next: M9 deploy & hardening.
+
+## v1.2.0-extras (2026-11-24)
+
+- Broadcast to verified users, sales report and support channel.
 
 ## v1.1.0-fulfillment (2026-11-24)
 
