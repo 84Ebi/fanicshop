@@ -25,8 +25,8 @@ Status: `todo` | `in progress` | `done`. Tick `- [x]` only when the task file sa
 
 ## M3 — Catalog & cart (tag `v0.4.0-catalog`)
 
-- [ ] `TASK-020` [Catalog browsing](tasks/TASK-020-catalog.md) — categories, product detail, stock display. **todo**
-- [ ] `TASK-021` [Cart management](tasks/TASK-021-cart.md) — add, qty change, remove, totals. **todo**
+- [x] `TASK-020` [Catalog browsing](tasks/TASK-020-catalog.md) — categories, product detail, stock display. **done**
+- [x] `TASK-021` [Cart management](tasks/TASK-021-cart.md) — add, qty change, remove, totals. **done**
 
 ## M4 — Checkout & orders (tag `v0.5.0-orders`)
 

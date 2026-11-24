@@ -67,4 +67,4 @@ Unit and end-to-end handler tests use a fake Telegram transport.
 `docs/ARCHITECTURE.md`, `docs/DATABASE.md`, `docs/PAYMENTS.md`,
 `docs/DECISIONS.md`, `docs/CHANGELOG.md`, `docs/legal-notes.fa.md`.
 
-Current milestone: **M2 signup & verification** (tag `v0.3.0-signup`).
+Current milestone: **M3 catalog & cart** (tag `v0.4.0-catalog`).

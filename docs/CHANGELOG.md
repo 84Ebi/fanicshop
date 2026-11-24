@@ -2,7 +2,13 @@
 
 ## Unreleased
 
-- Next: M3 catalog & cart.
+- Next: M4 checkout & orders.
+
+## v0.4.0-catalog (2026-11-24)
+
+- Catalog browsing with categories, product photos/descriptions, prices and stock.
+- Cart with price snapshots, stock-aware quantities, remove/clear and totals.
+- End-to-end shop flow tests; test DB fixtures now clean up reliably.
 
 ## v0.3.0-signup (2026-11-24)
 

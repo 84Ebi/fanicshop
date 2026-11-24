@@ -68,7 +68,16 @@ Log of milestone completion. Each milestone ends with tests green + a demo.
 - **70 tests green** (unit + real-Postgres integration + end-to-end handler);
   ruff and mypy clean.
 
-## M3 — Catalog & cart (pending)
+## M3 — Catalog & cart ✅
+
+**Done**
+- Catalog service: active categories/products, first photo, product cards with
+  Farsi description, Toman price and available stock.
+- Cart service: price snapshots, qty 1–20 bounded by available stock, add/update/
+  remove/clear/subtotal.
+- Inline navigation and cart controls; fake-transport end-to-end flow
+  (category → product → add → qty → view cart → remove).
+- 74 tests green; ruff and mypy clean.
 ## M4 — Checkout & orders (pending)
 ## M5 — Payments (pending)
 ## M6 — Admin panel (pending)
