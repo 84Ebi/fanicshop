@@ -26,6 +26,6 @@ def normalize_name(raw: str | None) -> str | None:
     if not _NAME_RE.match(name):
         return None
     # At least one letter (not just spaces/ZWNJ).
-    if not any("\u0600" <= ch <= "\u06FF" for ch in name):
+    if not any("\u0600" <= ch <= "\u06ff" for ch in name):
         return None
     return name

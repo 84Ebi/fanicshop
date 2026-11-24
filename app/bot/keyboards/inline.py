@@ -83,17 +83,11 @@ def admin_user_keyboard(user: User) -> InlineKeyboardMarkup:
         )
     if user.status == "blocked":
         rows.append(
-            [
-                InlineKeyboardButton(
-                    text=t("admin.unblock"), callback_data=f"adm:u:unb:{user.id}"
-                )
-            ]
+            [InlineKeyboardButton(text=t("admin.unblock"), callback_data=f"adm:u:unb:{user.id}")]
         )
     else:
         rows.append(
-            [
-                InlineKeyboardButton(text=t("admin.block"), callback_data=f"adm:u:blk:{user.id}")
-            ]
+            [InlineKeyboardButton(text=t("admin.block"), callback_data=f"adm:u:blk:{user.id}")]
         )
     rows.append([InlineKeyboardButton(text=t("common.back"), callback_data="adm:pending:0")])
     return InlineKeyboardMarkup(inline_keyboard=rows)
@@ -111,13 +105,9 @@ def pending_list_keyboard(users: list[User], page: int, has_next: bool) -> Inlin
     ]
     nav: list[InlineKeyboardButton] = []
     if page > 0:
-        nav.append(
-            InlineKeyboardButton(text="◀️", callback_data=f"adm:pending:{page - 1}")
-        )
+        nav.append(InlineKeyboardButton(text="◀️", callback_data=f"adm:pending:{page - 1}"))
     if has_next:
-        nav.append(
-            InlineKeyboardButton(text="▶️", callback_data=f"adm:pending:{page + 1}")
-        )
+        nav.append(InlineKeyboardButton(text="▶️", callback_data=f"adm:pending:{page + 1}"))
     if nav:
         rows.append(nav)
     rows.append([InlineKeyboardButton(text=t("common.back"), callback_data="adm:panel")])

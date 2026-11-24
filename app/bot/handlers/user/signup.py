@@ -11,13 +11,13 @@ from app.bot.keyboards.inline import signup_admin_keyboard, signup_confirm_keybo
 from app.bot.keyboards.reply import phone_keyboard, remove_keyboard
 from app.bot.states import Signup
 from app.config import Settings
+from app.db.models import User
 from app.i18n import t
 from app.services.notifications import notify_signup_admins
 from app.services.users import (
     InvalidProfile,
     InvalidTransition,
     PhoneTaken,
-    display_name,
     submit_signup,
 )
 from app.utils.digits import fa_digits
@@ -56,7 +56,7 @@ async def _accept_phone(message: Message, state: FSMContext, phone: str) -> None
 @router.message(Signup.phone, F.contact)
 async def phone_contact(message: Message, state: FSMContext) -> None:
     contact = message.contact
-    if contact is None or contact.user_id != message.from_user.id:
+    if message.from_user is None or contact is None or contact.user_id != message.from_user.id:
         await message.answer(t("signup.phone_wrong_contact"))
         return
     phone = normalize_phone(contact.phone_number)
@@ -85,7 +85,7 @@ async def confirm_signup(
     callback: CallbackQuery,
     state: FSMContext,
     session: AsyncSession,
-    user,
+    user: User | None,
     bot: Bot,
     settings: Settings,
 ) -> None:
@@ -108,7 +108,7 @@ async def confirm_signup(
     await session.commit()
     await state.clear()
 
-    if callback.message is not None:
+    if isinstance(callback.message, Message):
         await callback.message.edit_text(t("signup.submitted"))
     await notify_signup_admins(
         bot,
@@ -122,9 +122,7 @@ async def confirm_signup(
 @router.callback_query(Signup.confirm, F.data == "su:edit")
 async def edit_signup(callback: CallbackQuery, state: FSMContext) -> None:
     await state.set_state(Signup.full_name)
-    if callback.message is not None:
+    if isinstance(callback.message, Message):
         await callback.message.edit_text(t("signup.edit_ask"))
-        await callback.message.answer(
-            t("signup.name_ask"), reply_markup=remove_keyboard()
-        )
+        await callback.message.answer(t("signup.name_ask"), reply_markup=remove_keyboard())
     await callback.answer()

@@ -41,7 +41,11 @@ async def profile(message: Message, user) -> None:
     )
 
 
-@router.message(F.text.in_({t("menu.shop"), t("menu.cart"), t("menu.orders"), t("menu.wallet"), t("menu.support")}))
+@router.message(
+    F.text.in_(
+        {t("menu.shop"), t("menu.cart"), t("menu.orders"), t("menu.wallet"), t("menu.support")}
+    )
+)
 async def not_available(message: Message, user) -> None:
     if not await _guard(message, user):
         return

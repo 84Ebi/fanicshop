@@ -283,9 +283,10 @@ def can_access_shop(user: User | None) -> bool:
 
 
 async def count_pending(session: AsyncSession) -> int:
-    return int(
-        await session.scalar(select(func.count()).select_from(User).where(User.status == "pending")) or 0
+    pending = await session.scalar(
+        select(func.count()).select_from(User).where(User.status == "pending")
     )
+    return int(pending or 0)
 
 
 async def list_pending(session: AsyncSession, *, limit: int = 8, offset: int = 0) -> list[User]:
@@ -308,8 +309,11 @@ async def search_users(session: AsyncSession, query: str, *, limit: int = 10) ->
     if normalized:
         clauses.append(User.phone == normalized)
     if q.isdigit():
-        clauses.append(User.telegram_id == int(q))
-        clauses.append(User.id == int(q))
+        numeric = int(q)
+        clauses.append(User.telegram_id == numeric)
+        # `users.id` is int4: guard against phone-sized numbers overflowing it.
+        if numeric <= 2_147_483_647:
+            clauses.append(User.id == numeric)
     clauses.append(User.full_name.ilike(f"%{q}%"))
     rows = await session.scalars(
         select(User).where(or_(*clauses)).order_by(User.id.desc()).limit(limit)
