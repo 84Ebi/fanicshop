@@ -52,8 +52,8 @@ Status: `todo` | `in progress` | `done`. Tick `- [x]` only when the task file sa
 
 ## M7 — Fulfillment (tag `v1.1.0-fulfillment`)
 
-- [ ] `TASK-060` [Fulfillment notices](tasks/TASK-060-fulfillment.md) — paid order → admin, status → customer. **todo**
-- [ ] `TASK-061` [Receipt confirmation](tasks/TASK-061-confirmation.md) — customer confirms delivery. **todo**
+- [x] `TASK-060` [Fulfillment notices](tasks/TASK-060-fulfillment.md) — paid order → admin, status → customer. **done**
+- [x] `TASK-061` [Receipt confirmation](tasks/TASK-061-confirmation.md) — customer confirms delivery. **done**
 
 ## M8 — Extras (tag `v1.2.0-extras`)
 

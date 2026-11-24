@@ -2,7 +2,11 @@
 
 ## Unreleased
 
-- Next: M7 fulfillment notifications / M8 extras / M9 deploy hardening.
+- Next: M8 broadcast/reports, M9 deploy/hardening.
+
+## v1.1.0-fulfillment (2026-11-24)
+
+- Fulfilment buttons in paid-order admin notices and customer delivery confirmations.
 
 ## v1.0.0-mvp (2026-11-24)
 

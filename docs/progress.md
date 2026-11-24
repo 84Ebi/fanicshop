@@ -112,6 +112,11 @@ Log of milestone completion. Each milestone ends with tests green + a demo.
 > Test-environment note: another session's pytest process was observed using the
 > same local test database concurrently, causing intermittent cross-test failures.
 > Runs in isolation and most full runs are green; CI must use a private database.
-## M7 — Fulfillment (pending)
+## M7 — Fulfillment ✅
+
+- Paid-order admin notices include "ارسال شد" / "تحویل داده شد" buttons.
+- Admin status changes add history rows and notify the customer with a
+  receipt-confirmation button; confirmations are timestamped.
+- 104 tests green; ruff and mypy clean.
 ## M8 — Broadcast & polish (pending)
 ## M9 — Deploy & hardening (pending)

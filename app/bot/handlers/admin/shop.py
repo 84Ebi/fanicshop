@@ -394,6 +394,35 @@ async def admin_order_status(
     await callback.answer(t("admin.status_updated"))
 
 
+@router.callback_query(F.data.startswith("adm:fulfill:"))
+@router.callback_query(F.data.startswith("adm:ship:"))
+async def fulfillment_button(
+    callback: CallbackQuery, session: AsyncSession, bot: Bot
+) -> None:
+    _, action, raw_id = _data(callback).split(":")
+    order = await session.get(Order, int(raw_id))
+    if order is None:
+        await callback.answer(t("orders.gone"), show_alert=True)
+        return
+    status = "delivered" if action == "fulfill" else "shipped"
+    if not await set_order_status(session, order, status, actor_telegram_id=callback.from_user.id):
+        await callback.answer(t("admin.invalid_state"), show_alert=True)
+        return
+    await session.commit()
+    user = await session.get(User, order.user_id)
+    if user is not None:
+        from app.bot.keyboards.inline import receipt_confirm_keyboard
+
+        await bot.send_message(
+            user.telegram_id,
+            t("notify.delivered_ask"),
+            reply_markup=receipt_confirm_keyboard(order.id),
+        )
+    if isinstance(callback.message, Message):
+        await callback.message.edit_text(await _order_details(session, order))
+    await callback.answer(t("admin.status_updated"))
+
+
 @router.message(Command("credit"))
 async def credit_command(message: Message, session: AsyncSession) -> None:
     parts = _text(message).split()

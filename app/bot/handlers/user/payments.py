@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.bot.guards import allow_callback, allow_message
 from app.bot.handlers.user.orders import _order_details
 from app.bot.keyboards.inline import (
+    fulfillment_keyboard,
     payment_intent_keyboard,
     payment_method_keyboard,
     wallet_keyboard,
@@ -85,7 +86,12 @@ async def pay_wallet(
     remaining = order.total_rial - order.wallet_paid_rial - order.card_paid_rial
     if remaining == 0:
         await notify_user(bot, session, user, t("pay.paid"))
-        await notify_admins(bot, settings, await _order_details(session, order))
+        await notify_admins(
+            bot,
+            settings,
+            await _order_details(session, order),
+            reply_markup=fulfillment_keyboard(order.id),
+        )
         await session.commit()
         await _edit(callback, t("pay.paid"))
     else:
@@ -173,7 +179,12 @@ async def intent_status(
         await callback.answer(t("pay.paid"), show_alert=True)
         order = await session.get(Order, intent.order_id) if intent.order_id else None
         if order is not None:
-            await notify_admins(bot, settings, await _order_details(session, order))
+            await notify_admins(
+            bot,
+            settings,
+            await _order_details(session, order),
+            reply_markup=fulfillment_keyboard(order.id),
+        )
             await session.commit()
     elif intent.status == "expired":
         await callback.answer(t("pay.intent_expired"), show_alert=True)

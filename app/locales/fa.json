@@ -225,5 +225,10 @@
   "admin.credit_usage": "استفاده: /credit <user_id> <تومان> <دلیل>",
   "admin.credit_done": "✅ موجودی کاربر بهروز شد.",
   "admin.invalid_user": "کاربر پیدا نشد.",
-  "notify.order_status": "📦 وضعیت سفارش شما تغییر کرد: {status}"
+  "notify.order_status": "📦 وضعیت سفارش شما تغییر کرد: {status}",
+  "admin.shipped_button": "🚚 ارسال شد",
+  "admin.delivered_button": "✅ تحویل داده شد",
+  "notify.delivered_ask": "📦 سفارش شما ارسال/تحویل داده شد. لطفاً دریافت خود را تأیید کنید.",
+  "orders.confirm_receipt": "✅ تأیید دریافت",
+  "orders.confirmed": "✅ ممنون! دریافت سفارش تأیید شد."
 }

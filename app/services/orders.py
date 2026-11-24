@@ -251,6 +251,28 @@ async def list_orders(session: AsyncSession, user_id: int, *, limit: int = 20) -
     )
 
 
+async def confirm_delivery(
+    session: AsyncSession, order: Order, *, actor_telegram_id: int | None = None
+) -> bool:
+    """Customer confirms receipt of a shipped/delivered order."""
+    if order.customer_confirmed_at is not None:
+        return False
+    if order.status not in ("shipped", "out_for_delivery", "delivered"):
+        return False
+    order.customer_confirmed_at = datetime.now(UTC)
+    _history(
+        session,
+        order,
+        to_status=order.status,
+        source="user",
+        actor_telegram_id=actor_telegram_id,
+        note="customer confirmed receipt",
+        from_status=order.status,
+    )
+    await session.flush()
+    return True
+
+
 async def set_order_status(
     session: AsyncSession, order: Order, status: str, *, actor_telegram_id: int | None = None
 ) -> bool:

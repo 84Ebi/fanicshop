@@ -175,6 +175,33 @@ def product_keyboard(product: Product) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
+def fulfillment_keyboard(order_id: int) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text=t("admin.delivered_button"), callback_data=f"adm:fulfill:{order_id}"
+                ),
+                InlineKeyboardButton(
+                    text=t("admin.shipped_button"), callback_data=f"adm:ship:{order_id}"
+                ),
+            ]
+        ]
+    )
+
+
+def receipt_confirm_keyboard(order_id: int) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text=t("orders.confirm_receipt"), callback_data=f"dc:{order_id}"
+                )
+            ]
+        ]
+    )
+
+
 def payment_method_keyboard(
     order_id: int, balance_rial: int, total_rial: int
 ) -> InlineKeyboardMarkup:

@@ -350,3 +350,23 @@ async def order_cancel(
     await _edit(callback, await _order_details(session, order), order_keyboard(order))
 
 
+@router.callback_query(F.data.startswith("dc:"))
+async def confirm_receipt(
+    callback: CallbackQuery, session: AsyncSession, user: User | None
+) -> None:
+    if not await allow_callback(callback, user) or user is None:
+        return
+    from app.services.orders import confirm_delivery
+
+    order = await get_order(session, user.id, int(_data(callback).split(":")[1]))
+    if order is None:
+        await callback.answer(t("orders.gone"), show_alert=True)
+        return
+    if not await confirm_delivery(session, order, actor_telegram_id=user.telegram_id):
+        await callback.answer(t("admin.invalid_state"), show_alert=True)
+        return
+    await session.commit()
+    await _edit(callback, t("orders.confirmed"))
+    await callback.answer(t("orders.confirmed"))
+
+
