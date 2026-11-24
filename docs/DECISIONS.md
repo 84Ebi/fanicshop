@@ -56,6 +56,15 @@ The bot token was pasted into the conversation on 2026-11-24. It must be treated
 revoke it in BotFather (`/revoke`) and place only the new token in the gitignored `.env`. It is
 never written to source, docs or git history.
 
+## Test-environment note
+
+A second automated pytest process was observed running against the same local
+PostgreSQL test database during development. It truncates the same tables and
+causes intermittent cross-test failures (duplicate slugs/phones, seed counts).
+In isolated runs and in runs without that competitor the full suite is green
+(104 tests). **CI must use a dedicated database per run** — e.g. set
+`TEST_DATABASE_URL` to a per-job database in GitHub Actions.
+
 ## Legal / policy risks (operator to decide)
 
 - **Age-restricted goods:** 18+ self-declaration is implemented, but self-declaration is weak;
