@@ -14,6 +14,7 @@ dependencies = [
     "pydantic>=2.7",
     "pydantic-settings>=2.4",
     "structlog>=24.1",
+    "aiohttp-socks>=0.12.0",
 ]
 
 [dependency-groups]

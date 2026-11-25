@@ -2,7 +2,11 @@
 
 ## Unreleased
 
-- None — all planned milestones are complete.
+- Telegram API calls can now be routed through an HTTP/SOCKS proxy
+  (`HTTPS_PROXY` / `HTTP_PROXY` in `.env` or the environment) for hosts with
+  no direct route to `api.telegram.org`. Adds the `aiohttp-socks` dependency.
+- README: expanded "running on any system" guide (native `uv` vs Docker
+  Compose, process supervision) and a dedicated custom-proxy section.
 
 ## v1.3.0 (2026-11-24)
 

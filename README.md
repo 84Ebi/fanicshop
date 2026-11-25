@@ -19,17 +19,126 @@ The operator is responsible for legal compliance (see `docs/legal-notes.fa.md`).
 - Redis 7 (FSM state; in-memory fallback when unavailable)
 - Docker Compose for local + production; long polling by default, webhook ready
 
-## Setup
+## Quick start (any host)
 
-```bash
-cp .env.example .env        # fill in secrets; .env is gitignored
-uv sync --group dev         # or: docker compose up -d --build
-alembic upgrade head        # migrations (also runnable in the container)
-python -m app.main          # long polling + /healthz on :8080
-curl localhost:8080/healthz
+```
+# 1. Get the code
+git clone git@github.com:84Ebi/fanicshop.git && cd fanicshop
+
+# 2. Configure secrets (token from @BotFather, at minimum)
+cp .env.example .env && $EDITOR .env
+
+# 3. Install deps, migrate, run
+uv sync --group dev
+alembic upgrade head
+python -m app.main
 ```
 
-> In this sandbox `UV_NO_CONFIG=1` is required for all `uv` commands.
+The bot then:
+- starts long-polling Telegram (default `BOT_MODE=polling`), and
+- serves `/healthz` (and the internal SMS webhook) on `:8080`.
+
+Check it:
+
+```
+curl localhost:8080/healthz    # -> {"status":"ok","db":"ok"}
+```
+
+## Running on any system/server
+
+The bot runs anywhere Python 3.12 + PostgreSQL 16 are available — a laptop, a
+VPS, or Docker. Pick the path that fits your host.
+
+### Option A — native (uv + system PostgreSQL)
+
+Requires: Python ≥ 3.12, `uv`, and a reachable PostgreSQL 16.
+
+```bash
+# 1. Configure environment
+cp .env.example .env
+$EDITOR .env        # set BOT_TOKEN (required), DATABASE_URL, ADMIN_IDS, …
+
+# 2. Install dependencies
+uv sync --group dev
+
+# 3. Create + migrate the database (DATABASE_URL from .env)
+alembic upgrade head
+
+# 4. Run (polling + HTTP :8080)
+python -m app.main
+```
+
+> On some sandboxes `UV_NO_CONFIG=1` is required for `uv` commands.
+
+### Option B — Docker Compose (postgres + redis + bot)
+
+Requires: Docker with Compose v2 and outbound internet to pull images.
+
+```bash
+# Secrets: put your real values into .env (docker-compose.yml loads it).
+$EDITOR .env
+
+# Build and start the whole stack (postgres, redis, bot).
+docker compose up -d --build
+
+# Follow the bot logs.
+docker compose logs -f bot
+```
+
+The compose stack runs `alembic upgrade head` on startup, so no manual
+migration step is needed. The bot is published on `:8080`.
+
+### Keeping it running (production)
+
+For a long-lived process, do not rely on a foreground shell. Use a process
+supervisor:
+
+```bash
+# systemd unit (example) — see docs/TASK-080-deploy.md for a full walkthrough.
+# /etc/systemd/system/fanicbot.service
+[Service]
+WorkingDirectory=/opt/fanicshop
+EnvironmentFile=/opt/fanicshop/.env
+ExecStart=/opt/fanicshop/.venv/bin/python -m app.main
+Restart=always
+```
+
+…or `nohup python -m app.main >> bot.log 2>&1 &`, `supervisord`, or run the
+Docker image with `restart: unless-stopped` (already set).
+
+## Using a custom proxy for Telegram
+
+The bot talks to `api.telegram.org`. If your host has no direct route to it
+(private network, corporate firewall, restricted egress), route those calls
+through a proxy. The bot honors the standard proxy environment variables
+(any of `HTTPS_PROXY`, `https_proxy`, `HTTP_PROXY`, `http_proxy`); it reads
+them at startup. No extra config file is needed.
+
+```bash
+# In .env (or exported before starting):
+HTTPS_PROXY=http://127.0.0.1:10808
+HTTP_PROXY=http://127.0.0.1:10808
+
+# Also keep local traffic direct:
+NO_PROXY=localhost,127.0.0.1
+```
+
+The value may be an HTTP, HTTPS, or SOCKS5 proxy (`socks5://…`). aiogram's
+proxy support requires the `aiohttp-socks` package, which is already a
+dependency of this project (added for this feature).
+
+Verify the proxy works first:
+
+```bash
+export HTTPS_PROXY=http://127.0.0.1:10808
+curl -sS -I https://api.telegram.org/ | head -1   # expect HTTP/1.1 3xx
+```
+
+If `curl` succeeds but the bot still cannot reach Telegram, confirm the proxy
+is actually seen by the bot process. The bot reads `HTTPS_PROXY`/`HTTP_PROXY`
+both from `.env` and from the exported environment, so either form works;
+if you set it nowhere, the bot tries a direct connection and will fail on
+hosts without Telegram egress.
 
 ### Environment variables
 

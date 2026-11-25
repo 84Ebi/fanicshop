@@ -79,6 +79,12 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://fanic:fanic@postgres:5432/fanic"
     redis_url: str = "redis://redis:6379/0"
 
+    # ── Network / proxy (optional) ────────────────────────────────────────
+    # Used to route Telegram API calls when the host has no direct route to
+    # api.telegram.org. Falls back to standard HTTPS_PROXY/HTTP_PROXY env vars.
+    https_proxy: str | None = None
+    http_proxy: str | None = None
+
     # ── Receiving card (payment) ──────────────────────────────────────────
     shop_card_number: str | None = None  # full PAN, env only, never logged
     shop_card_holder: str | None = None

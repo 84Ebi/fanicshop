@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import asyncio
+import os
 
 from aiogram import Bot
+from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.types import Update
 from aiohttp import web
 from sqlalchemy import text
@@ -66,6 +68,23 @@ async def _telegram_webhook(request: web.Request) -> web.Response:
     return web.Response(text="ok")
 
 
+def _bot_session(settings: Settings) -> AiohttpSession | None:
+    """Route Telegram API calls through an HTTP/SOCKS proxy if one is set.
+
+    Checks the settings (from `.env`) first, then the standard proxy env vars.
+    aiogram does not apply either itself.
+    """
+    proxy = settings.https_proxy or settings.http_proxy
+    if not proxy:
+        for key in ("HTTPS_PROXY", "https_proxy", "HTTP_PROXY", "http_proxy"):
+            proxy = os.getenv(key)
+            if proxy:
+                break
+    if proxy:
+        return AiohttpSession(proxy=proxy)
+    return None
+
+
 async def serve_forever(settings: Settings | None = None) -> None:
     settings = settings or get_settings()
     setup_logging(settings.log_level)
@@ -76,7 +95,12 @@ async def serve_forever(settings: Settings | None = None) -> None:
         await conn.execute(text("SELECT 1"))
     log.info("db_ready")
 
-    bot = Bot(token=settings.bot_token)
+    bot_session = _bot_session(settings)
+    bot = (
+        Bot(token=settings.bot_token, session=bot_session)
+        if bot_session is not None
+        else Bot(token=settings.bot_token)
+    )
     dispatcher = await build_dispatcher(settings, session_factory)
 
     app = build_app(session_factory, settings, bot, dispatcher)
