@@ -300,6 +300,26 @@ async def list_pending(session: AsyncSession, *, limit: int = 8, offset: int = 0
     return list(rows)
 
 
+async def list_users(
+    session: AsyncSession,
+    *,
+    status: str | None = None,
+    limit: int = 8,
+    offset: int = 0,
+) -> list[User]:
+    query = select(User).order_by(User.id.desc())
+    if status:
+        query = query.where(User.status == status)
+    return list((await session.scalars(query.limit(limit).offset(offset))).all())
+
+
+async def count_users(session: AsyncSession, *, status: str | None = None) -> int:
+    query = select(func.count()).select_from(User)
+    if status:
+        query = query.where(User.status == status)
+    return int(await session.scalar(query) or 0)
+
+
 async def search_users(session: AsyncSession, query: str, *, limit: int = 10) -> list[User]:
     q = query.strip()
     if not q:

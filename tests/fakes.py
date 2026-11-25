@@ -12,7 +12,7 @@ from typing import Any
 from aiogram import Bot
 from aiogram.client.session.base import BaseSession
 from aiogram.methods import TelegramMethod
-from aiogram.types import Chat, Message, Update, User
+from aiogram.types import Chat, Location, Message, Update, User
 
 
 class FakeSession(BaseSession):
@@ -98,6 +98,17 @@ class FakeSession(BaseSession):
                 chat=Chat(id=chat_id, type="private"),
                 from_user=User(id=bot.id, is_bot=True, first_name="Test Bot"),
                 text=data.get("text"),
+            )
+        if name == "SendLocation":
+            chat_id = int(data["chat_id"])
+            return Message(
+                message_id=self._next_id(),
+                date=datetime.now(UTC),
+                chat=Chat(id=chat_id, type="private"),
+                from_user=User(id=bot.id, is_bot=True, first_name="Test Bot"),
+                location=Location(
+                    latitude=data.get("latitude"), longitude=data.get("longitude")
+                ),
             )
         if name in ("AnswerCallbackQuery", "DeleteMessage", "SendChatAction"):
             return True

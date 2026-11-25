@@ -26,6 +26,19 @@ def main_menu_keyboard() -> ReplyKeyboardMarkup:
             [KeyboardButton(text=t("menu.profile")), KeyboardButton(text=t("menu.support"))],
         ],
         resize_keyboard=True,
+        is_persistent=True,
+    )
+
+
+def checkout_contact_keyboard() -> ReplyKeyboardMarkup:
+    return ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text=t("checkout.share_contact"), request_contact=True)],
+            [KeyboardButton(text=t("checkout.use_telegram_id"))],
+        ],
+        resize_keyboard=True,
+        one_time_keyboard=True,
+        is_persistent=True,
     )
 
 

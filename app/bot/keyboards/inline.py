@@ -65,14 +65,26 @@ def admin_panel_keyboard(pending_count: int) -> InlineKeyboardMarkup:
                 InlineKeyboardButton(
                     text=t("admin.pending", count=pending_count),
                     callback_data="adm:pending:0",
-                )
+                ),
+                InlineKeyboardButton(text=t("admin.users"), callback_data="adm:users"),
             ],
-            [InlineKeyboardButton(text=t("admin.users"), callback_data="adm:users")],
+            [
+                InlineKeyboardButton(text=t("admin.products"), callback_data="adm:goto:products"),
+                InlineKeyboardButton(text=t("admin.orders"), callback_data="adm:goto:orders"),
+            ],
+            [
+                InlineKeyboardButton(text=t("admin.payments"), callback_data="adm:goto:payments"),
+                InlineKeyboardButton(text=t("admin.broadcast"), callback_data="adm:goto:broadcast"),
+            ],
+            [
+                InlineKeyboardButton(text=t("admin.report"), callback_data="adm:goto:report"),
+                InlineKeyboardButton(text=t("admin.support"), callback_data="adm:goto:support"),
+            ],
         ]
     )
 
 
-def admin_user_keyboard(user: User) -> InlineKeyboardMarkup:
+def admin_user_keyboard(user: User, back: str = "adm:users") -> InlineKeyboardMarkup:
     rows: list[list[InlineKeyboardButton]] = []
     if user.status == "pending":
         rows.append(
@@ -89,7 +101,10 @@ def admin_user_keyboard(user: User) -> InlineKeyboardMarkup:
         rows.append(
             [InlineKeyboardButton(text=t("admin.block"), callback_data=f"adm:u:blk:{user.id}")]
         )
-    rows.append([InlineKeyboardButton(text=t("common.back"), callback_data="adm:pending:0")])
+    rows.append(
+        [InlineKeyboardButton(text=t("admin.message"), callback_data=f"adm:u:msg:{user.id}")]
+    )
+    rows.append([InlineKeyboardButton(text=t("common.back"), callback_data=back)])
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
@@ -322,4 +337,79 @@ def cart_keyboard(items: list[CartItem]) -> InlineKeyboardMarkup:
     if items:
         rows.append([InlineKeyboardButton(text=t("cart.checkout"), callback_data="checkout")])
         rows.append([InlineKeyboardButton(text=t("cart.clear"), callback_data="cc")])
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def paged_list_keyboard(
+    items: list[tuple[str, str]],
+    *,
+    page: int,
+    has_next: bool,
+    prefix: str,
+    back_cb: str,
+) -> InlineKeyboardMarkup:
+    """Generic paged list: item rows + prev/next + back."""
+    rows = [
+        [InlineKeyboardButton(text=label, callback_data=cb)] for label, cb in items
+    ]
+    nav: list[InlineKeyboardButton] = []
+    if page > 0:
+        nav.append(InlineKeyboardButton(text="◀️", callback_data=f"{prefix}{page - 1}"))
+    if has_next:
+        nav.append(InlineKeyboardButton(text="▶️", callback_data=f"{prefix}{page + 1}"))
+    if nav:
+        rows.append(nav)
+    rows.append([InlineKeyboardButton(text=t("common.back"), callback_data=back_cb)])
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def admin_support_menu_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text=t("support.open_inbox"), callback_data="sup:threads:0")],
+            [InlineKeyboardButton(text=t("admin.broadcast_log"), callback_data="sup:bcast:0")],
+            [InlineKeyboardButton(text=t("common.back"), callback_data="adm:panel")],
+        ]
+    )
+
+
+def support_thread_keyboard(thread) -> InlineKeyboardMarkup:
+    rows: list[list[InlineKeyboardButton]] = []
+    if thread.is_open:
+        rows.append(
+            [InlineKeyboardButton(text=t("support.close"), callback_data=f"sup:c:{thread.id}")]
+        )
+    else:
+        rows.append(
+            [InlineKeyboardButton(text=t("support.reopen"), callback_data=f"sup:c:{thread.id}")]
+        )
+    rows.append(
+        [InlineKeyboardButton(text=t("support.reply"), callback_data=f"sup:r:{thread.id}")]
+    )
+    rows.append([InlineKeyboardButton(text=t("common.back"), callback_data="sup:threads:0")])
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def admin_users_menu_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text=t("admin.user_search"), callback_data="adm:search")],
+            [InlineKeyboardButton(text=t("admin.pending_short"), callback_data="adm:pending:0")],
+            [InlineKeyboardButton(text=t("admin.all_users"), callback_data="adm:all:all:0")],
+            [InlineKeyboardButton(text=t("common.back"), callback_data="adm:panel")],
+        ]
+    )
+
+
+def user_status_filter_keyboard(current: str, page: int) -> InlineKeyboardMarkup:
+    rows = [
+        [
+            InlineKeyboardButton(
+                text=t("admin.filter.all_users" if s == "all" else f"profile.status.{s}"),
+                callback_data=f"adm:all:{s}:0",
+            )
+            for s in ("all", "verified", "pending", "blocked")
+        ]
+    ]
+    rows.append([InlineKeyboardButton(text=t("common.back"), callback_data="adm:users")])
     return InlineKeyboardMarkup(inline_keyboard=rows)

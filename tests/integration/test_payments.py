@@ -20,7 +20,7 @@ from app.db.models import (
     User,
 )
 from app.services.cart import add_item
-from app.services.orders import create_address, create_order
+from app.services.orders import create_order
 from app.services.payments import (
     ParsedSms,
     attach_proof,
@@ -63,16 +63,12 @@ async def _make_order(session: AsyncSession, *, qty: int = 2, slug: str = "tea")
     session.add_all([user, product])
     await session.flush()
     await add_item(session, user.id, product, qty)
-    address = await create_address(
+    order = await create_order(
         session,
-        user.id,
-        receiver_name="علی رضایی",
-        receiver_phone="09121234567",
-        province="تهران",
-        city="تهران",
-        address_line="خیابان آزادی، پلاک ۱۲",
+        user_id=user.id,
+        contact_kind="phone",
+        contact="9121234567",
     )
-    order = await create_order(session, user_id=user.id, address=address)
     return user, product, order
 
 

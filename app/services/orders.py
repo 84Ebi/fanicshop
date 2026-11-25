@@ -6,10 +6,10 @@ import secrets
 from datetime import UTC, datetime
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import Address, Cart, Order, OrderItem, OrderStatusHistory, Product
+from app.db.models import Address, Cart, Order, OrderItem, OrderStatusHistory, Product, User
 from app.db.models.orders import ORDER_STATUSES
 from app.services.cart import list_items, subtotal
 from app.services.catalog import available
@@ -103,6 +103,11 @@ def address_snapshot(address: Address) -> dict[str, Any]:
     }
 
 
+def contact_snapshot(contact_kind: str, contact: str) -> dict[str, Any]:
+    """Delivery contact stored on an order: a Telegram id or a phone number."""
+    return {"contact_kind": contact_kind, "contact": contact}
+
+
 def _public_code() -> str:
     stamp = datetime.now(UTC).strftime("%y%m%d")
     return f"F-{stamp}-{secrets.randbelow(1_000_000):06d}"
@@ -134,7 +139,8 @@ async def create_order(
     session: AsyncSession,
     *,
     user_id: int,
-    address: Address | None,
+    contact_kind: str,
+    contact: str,
     delivery_note: str | None = None,
     delivery_fee_rial: int = 0,
     actor_telegram_id: int | None = None,
@@ -143,8 +149,8 @@ async def create_order(
     items = await list_items(session, cart.id) if cart else []
     if not items:
         raise EmptyCart("cart is empty")
-    if address is None:
-        raise NoAddress("address required")
+    if not contact:
+        raise NoAddress("contact required")
 
     # Lock products and re-check stock before reserving.
     product_ids = [item.product_id for item in items]
@@ -179,7 +185,7 @@ async def create_order(
         total_rial=sub + delivery_fee_rial,
         wallet_paid_rial=0,
         card_paid_rial=0,
-        address_snapshot=address_snapshot(address),
+        address_snapshot=contact_snapshot(contact_kind, contact),
         delivery_note=(delivery_note or "").strip()[:300] or None,
     )
     session.add(order)
@@ -227,10 +233,21 @@ async def format_order(session: AsyncSession, order: Order) -> tuple[str, str]:
         )
         for item in items
     )
+    from app.utils.phone import display_phone
+
     snap = order.address_snapshot or {}
-    address_text = " - ".join(
-        str(snap.get(key, "")) for key in ("province", "city", "address_line")
-    )
+    if snap.get("contact_kind") == "phone":
+        address_text = t(
+            "orders.contact_phone",
+            phone=fa_digits(display_phone(snap.get("contact", ""))),
+        )
+    elif snap.get("contact_kind") == "telegram_id":
+        address_text = t("orders.contact_telegram_id", id=snap.get("contact", ""))
+    else:
+        address_text = t("orders.contact_none")
+    loc = order.delivery_location or {}
+    if loc.get("latitude") is not None:
+        address_text += t("orders.delivery_location", label=loc.get("label") or "")
     return items_text, address_text
 
 
@@ -238,6 +255,50 @@ async def get_order(session: AsyncSession, user_id: int, order_id: int) -> Order
     return await session.scalar(
         select(Order).where(Order.id == order_id, Order.user_id == user_id)
     )
+
+
+async def list_orders_admin(
+    session: AsyncSession,
+    *,
+    status: str | None = None,
+    search: str | None = None,
+    limit: int = 8,
+    offset: int = 0,
+) -> list[Order]:
+    query = select(Order).order_by(Order.id.desc())
+    if status and status != "all":
+        query = query.where(Order.status == status)
+    if search:
+        like = f"%{search.strip()}%"
+        query = query.join(User, Order.user_id == User.id).where(
+            or_(
+                Order.public_code.ilike(like),
+                User.full_name.ilike(like),
+                User.phone.ilike(like),
+            )
+        )
+    return list((await session.scalars(query.limit(limit).offset(offset))).all())
+
+
+async def count_orders_admin(
+    session: AsyncSession,
+    *,
+    status: str | None = None,
+    search: str | None = None,
+) -> int:
+    query = select(func.count()).select_from(Order)
+    if status and status != "all":
+        query = query.where(Order.status == status)
+    if search:
+        like = f"%{search.strip()}%"
+        query = query.join(User, Order.user_id == User.id).where(
+            or_(
+                Order.public_code.ilike(like),
+                User.full_name.ilike(like),
+                User.phone.ilike(like),
+            )
+        )
+    return int(await session.scalar(query) or 0)
 
 
 async def list_orders(session: AsyncSession, user_id: int, *, limit: int = 20) -> list[Order]:

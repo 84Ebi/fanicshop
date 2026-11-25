@@ -118,3 +118,21 @@ async def payments_log(message: Message, session: AsyncSession) -> None:
         for i in intents
     ]
     await message.answer("\n".join(lines))
+
+
+@router.callback_query(F.data == "adm:goto:payments")
+async def goto_payments(callback: CallbackQuery, session: AsyncSession) -> None:
+    intents = list(
+        await session.scalars(
+            select(PaymentIntent).order_by(PaymentIntent.id.desc()).limit(20)
+        )
+    )
+    if isinstance(callback.message, Message) and intents:
+        lines = [
+            f"#{i.id} — {i.purpose} — {money_rial(i.expected_amount_rial)} — {i.status}"
+            for i in intents
+        ]
+        await callback.message.edit_text("\n".join(lines))
+    elif isinstance(callback.message, Message):
+        await callback.message.edit_text(t("admin.proof_empty"))
+    await callback.answer()

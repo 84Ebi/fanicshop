@@ -20,26 +20,32 @@ class Topup(StatesGroup):
 
 
 class Checkout(StatesGroup):
-    address = State()
-    note = State()
+    contact = State()
     confirm = State()
 
 
-class NewAddress(StatesGroup):
-    receiver = State()
-    phone = State()
-    province = State()
-    city = State()
-    line = State()
-    postal = State()
+class AdminOrderLocation(StatesGroup):
+    location = State()
 
 
 class AdminBroadcast(StatesGroup):
     text = State()
 
 
+class AdminOrderSearch(StatesGroup):
+    query = State()
+
+
+class AdminOrderRefund(StatesGroup):
+    reason = State()
+
+
 class SupportFlow(StatesGroup):
     message = State()
+
+
+class SupportAdminReply(StatesGroup):
+    text = State()
 
 
 class AdminProduct(StatesGroup):
@@ -58,3 +64,4 @@ class AdminUserFlow(StatesGroup):
     reject_reason = State()
     block_reason = State()
     search = State()
+    message = State()

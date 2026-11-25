@@ -13,6 +13,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 from app.bot.setup import build_dispatcher
 from app.config import Settings
 from app.db.models import Category, Order, Product, User
+from app.i18n import t
 from tests.conftest import truncate_all
 from tests.fakes import FakeSession, callback_update, make_message, message_update
 
@@ -79,13 +80,8 @@ async def test_full_checkout(env) -> None:
     await _cb(env, f"a:{env.product_id}", 4)
     await _cb(env, "checkout", 5)
 
-    await _msg(env, "علی رضایی", 6)
-    await _msg(env, "09121234567", 7)
-    await _msg(env, "تهران", 8)
-    await _msg(env, "تهران", 9)
-    await _msg(env, "خیابان آزادی، پلاک ۱۲", 10)
-    await _msg(env, "1234567890", 11)
-    await _cb(env, "co:ok", 12)
+    await _msg(env, t("checkout.use_telegram_id"), 6)
+    await _cb(env, "co:ok", 7)
 
     async with env.factory() as session:
         orders = list(await session.scalars(select(Order)))
@@ -93,12 +89,37 @@ async def test_full_checkout(env) -> None:
         order = orders[0]
         assert order.status == "awaiting_payment"
         assert order.total_rial == 505_000
-        assert order.delivery_note is None
+        assert order.address_snapshot["contact_kind"] == "telegram_id"
+        assert order.address_snapshot["contact"] == str(USER_ID)
+        assert order.delivery_location is None
         product = await session.get(Product, env.product_id)
         assert product is not None and product.reserved_qty == 1
 
     texts = env.fake.sent_texts(USER_ID)
     assert any("F-" in text for text in texts)
+
+
+async def test_checkout_with_shared_contact(env) -> None:
+    from aiogram.types import Contact
+
+    await _msg(env, "🛍 فروشگاه", 50)
+    await _cb(env, f"cat:{env.category_id}", 51)
+    await _cb(env, f"p:{env.product_id}", 52)
+    await _cb(env, f"a:{env.product_id}", 53)
+    await _cb(env, "checkout", 54)
+
+    contact = Contact(phone_number="09121234567", first_name="علی")
+    update = message_update(
+        make_message(user_id=USER_ID, contact=contact, message_id=55), 55
+    )
+    await _feed(env, update)
+    await _cb(env, "co:ok", 56)
+
+    async with env.factory() as session:
+        order = (await session.scalars(select(Order))).first()
+        assert order is not None
+        assert order.address_snapshot["contact_kind"] == "phone"
+        assert order.address_snapshot["contact"] == "9121234567"
 
 
 async def test_orders_list_and_cancel(env) -> None:
@@ -107,12 +128,8 @@ async def test_orders_list_and_cancel(env) -> None:
     await _cb(env, f"p:{env.product_id}", 22)
     await _cb(env, f"a:{env.product_id}", 23)
     await _cb(env, "checkout", 24)
-    for i, value in enumerate(
-        ["علی رضایی", "09121234567", "تهران", "تهران", "خیابان آزادی، پلاک ۱۲", "1234567890"],
-        start=25,
-    ):
-        await _msg(env, value, i)
-    await _cb(env, "co:ok", 31)
+    await _msg(env, t("checkout.use_telegram_id"), 25)
+    await _cb(env, "co:ok", 26)
 
     await _msg(env, "📦 سفارش‌های من", 32)
     assert any("سفارش" in text and "من" in text for text in env.fake.sent_texts(USER_ID))

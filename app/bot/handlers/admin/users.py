@@ -13,20 +13,26 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.bot.keyboards.inline import (
     admin_panel_keyboard,
     admin_user_keyboard,
+    admin_users_menu_keyboard,
     back_to_panel_keyboard,
+    paged_list_keyboard,
     pending_list_keyboard,
     user_results_keyboard,
+    user_status_filter_keyboard,
 )
 from app.bot.states import AdminUserFlow
 from app.db.models import User
 from app.i18n import t
 from app.services.notifications import notify_user
+from app.services.support import append_support_message, get_or_create_thread
 from app.services.users import (
     InvalidTransition,
     approve_user,
     block_user,
     count_pending,
+    count_users,
     list_pending,
+    list_users,
     reject_user,
     search_users,
     unblock_user,
@@ -292,11 +298,60 @@ async def unblock(callback: CallbackQuery, session: AsyncSession, bot: Bot) -> N
 
 
 @router.callback_query(F.data == "adm:users")
+async def users_menu(callback: CallbackQuery) -> None:
+    msg = _msg(callback)
+    if msg is not None:
+        await msg.edit_text(t("admin.users_menu"), reply_markup=admin_users_menu_keyboard())
+    await callback.answer()
+
+
+@router.callback_query(F.data == "adm:search")
 async def users_search_start(callback: CallbackQuery, state: FSMContext) -> None:
     await state.set_state(AdminUserFlow.search)
     msg = _msg(callback)
     if msg is not None:
         await msg.edit_text(t("admin.search_hint"))
+    await callback.answer()
+
+
+@router.callback_query(F.data.startswith("adm:all:"))
+async def users_all_list(callback: CallbackQuery, session: AsyncSession) -> None:
+    _, _, status, page_str = _parts(callback)
+    page = int(page_str)
+    status_filter = None if status == "all" else status
+    users = await list_users(
+        session, status=status_filter, limit=PAGE_SIZE, offset=page * PAGE_SIZE
+    )
+    total = await count_users(session, status=status_filter)
+    has_next = (page + 1) * PAGE_SIZE < total
+    items = [
+        (
+            f"{u.full_name} — {fa_digits(display_phone(u.phone))} ({_status_label(u)})",
+            f"adm:u:view:{u.id}",
+        )
+        for u in users
+    ]
+    text = t("admin.all_title") + f" ({total} " + t("admin.users") + ")"
+    msg = _msg(callback)
+    if not items:
+        if msg is not None:
+            await msg.edit_text(
+                t("admin.not_found"),
+                reply_markup=user_status_filter_keyboard(status, 0),
+            )
+        await callback.answer()
+        return
+    if msg is not None:
+        await msg.edit_text(
+            text,
+            reply_markup=paged_list_keyboard(
+                items,
+                page=page,
+                has_next=has_next,
+                prefix=f"adm:all:{status}:",
+                back_cb="adm:users",
+            ),
+        )
     await callback.answer()
 
 
@@ -318,3 +373,36 @@ async def users_search(message: Message, state: FSMContext, session: AsyncSessio
         for u in users
     )
     await message.answer(t("admin.user_list", rows=rows), reply_markup=user_results_keyboard(users))
+
+
+@router.callback_query(F.data.startswith("adm:u:msg:"))
+async def user_message_start(callback: CallbackQuery, state: FSMContext) -> None:
+    await state.set_state(AdminUserFlow.message)
+    await state.update_data(user_id=int(_parts(callback)[3]))
+    msg = _msg(callback)
+    if msg is not None:
+        await msg.edit_text(t("admin.user_message_ask"))
+    await callback.answer()
+
+
+@router.message(AdminUserFlow.message, F.text)
+async def user_message_send(
+    message: Message, state: FSMContext, session: AsyncSession, bot: Bot
+) -> None:
+    data = await state.get_data()
+    await state.clear()
+    user = await session.get(User, int(data.get("user_id", 0)))
+    if user is None:
+        await message.answer(t("admin.not_found"))
+        return
+    text = (message.text or "")[:2000]
+    try:
+        await bot.send_message(user.telegram_id, text)
+    except Exception:  # noqa: BLE001 - delivery is best-effort
+        pass
+    thread = await get_or_create_thread(session, user.id)
+    await append_support_message(
+        session, thread_id=thread.id, direction="admin", text=text
+    )
+    await session.commit()
+    await message.answer(t("support.sent"))

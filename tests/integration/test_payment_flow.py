@@ -14,7 +14,7 @@ from app.bot.setup import build_dispatcher
 from app.config import Settings
 from app.db.models import Category, PaymentIntent, Product, User
 from app.services.cart import add_item
-from app.services.orders import create_address, create_order
+from app.services.orders import create_order
 from tests.fakes import FakeSession, callback_update
 
 USER_ID = 6003
@@ -41,11 +41,9 @@ async def env(engine):
         session.add_all([product, user])
         await session.flush()
         await add_item(session, user.id, product, 2)
-        address = await create_address(
-            session, user.id, receiver_name="علی رضایی", receiver_phone="09121234567",
-            province="تهران", city="تهران", address_line="خیابان آزادی، پلاک ۱۲",
+        order = await create_order(
+            session, user_id=user.id, contact_kind="phone", contact="9121234567"
         )
-        order = await create_order(session, user_id=user.id, address=address)
         await session.commit()
         order_id, user_id_db = order.id, user.id
     fake = FakeSession()

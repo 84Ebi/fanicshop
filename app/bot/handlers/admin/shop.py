@@ -6,11 +6,11 @@ from aiogram import Bot, F, Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.bot.handlers.user.orders import _order_details
-from app.bot.states import AdminProduct
+from app.bot.keyboards.inline import paged_list_keyboard
+from app.bot.states import AdminOrderLocation, AdminOrderRefund, AdminOrderSearch, AdminProduct
 from app.db.models import Order, User
 from app.i18n import fa_digits, money_rial, t
 from app.services.catalog import (
@@ -24,7 +24,7 @@ from app.services.catalog import (
     set_stock,
 )
 from app.services.notifications import notify_user
-from app.services.orders import set_order_status
+from app.services.orders import count_orders_admin, list_orders_admin, set_order_status
 from app.services.wallet import admin_adjust
 
 router = Router(name="admin_shop")
@@ -98,16 +98,17 @@ def _order_filter_markup() -> InlineKeyboardMarkup:
         "cancelled",
     ]
     rows = [
-        [InlineKeyboardButton(text=t("admin.order_filter_all"), callback_data="ao:filter:all")]
+        [InlineKeyboardButton(text=t("admin.order_filter_all"), callback_data="ao:list:all:0")]
     ]
     rows += [
         [
             InlineKeyboardButton(
-                text=t(f"orders.status.{status}"), callback_data=f"ao:filter:{status}"
+                text=t(f"orders.status.{status}"), callback_data=f"ao:list:{status}:0"
             )
         ]
         for status in statuses
     ]
+    rows.append([InlineKeyboardButton(text=t("admin.order_search"), callback_data="ao:search")])
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
@@ -324,13 +325,74 @@ async def orders_command(message: Message) -> None:
     await message.answer(t("admin.orders_title"), reply_markup=_order_filter_markup())
 
 
-@router.callback_query(F.data.startswith("ao:filter:"))
-async def orders_filter(callback: CallbackQuery, session: AsyncSession) -> None:
-    status = _data(callback).split(":")[2]
-    query = select(Order).order_by(Order.id.desc()).limit(50)
-    if status != "all":
-        query = query.where(Order.status == status)
-    orders = list(await session.scalars(query))
+async def _render_order_list(
+    callback: CallbackQuery,
+    session: AsyncSession,
+    *,
+    status: str,
+    search: str | None,
+    page: int,
+) -> None:
+    orders = await list_orders_admin(
+        session,
+        status=status,
+        search=search,
+        limit=8,
+        offset=page * 8,
+    )
+    total = await count_orders_admin(session, status=status, search=search)
+    has_next = (page + 1) * 8 < total
+    items = [
+        (
+            t(
+                "admin.order_line",
+                code=o.public_code,
+                status=t(f"orders.status.{o.status}"),
+                total=money_rial(o.total_rial),
+            ),
+            f"ao:view:{o.id}",
+        )
+        for o in orders
+    ]
+    prefix = f"ao:list:{status}:"
+    if search:
+        text = t("admin.order_search_results") + f" ({total})"
+    else:
+        text = t("admin.orders_title") + f" ({total})"
+    if isinstance(callback.message, Message):
+        await callback.message.edit_text(
+            text if items else t("orders.empty"),
+            reply_markup=paged_list_keyboard(
+                items, page=page, has_next=has_next, prefix=prefix, back_cb="adm:goto:orders"
+            ),
+        )
+    await callback.answer()
+
+
+@router.callback_query(F.data.startswith("ao:list:"))
+async def orders_list(callback: CallbackQuery, session: AsyncSession) -> None:
+    _, _, status, page_str = _data(callback).split(":")
+    await _render_order_list(
+        callback, session, status=status, search=None, page=int(page_str)
+    )
+
+
+@router.callback_query(F.data == "ao:search")
+async def orders_search_start(callback: CallbackQuery, state: FSMContext) -> None:
+    await state.set_state(AdminOrderSearch.query)
+    if isinstance(callback.message, Message):
+        await callback.message.answer(t("admin.order_search_ask"))
+    await callback.answer()
+
+
+@router.message(AdminOrderSearch.query, F.text)
+async def orders_search(message: Message, state: FSMContext, session: AsyncSession) -> None:
+    text = (message.text or "").strip()
+    await state.clear()
+    orders = await list_orders_admin(session, status="all", search=text, limit=8)
+    if not orders:
+        await message.answer(t("orders.empty"), reply_markup=_order_filter_markup())
+        return
     rows = "\n".join(
         t(
             "admin.order_line",
@@ -340,11 +402,7 @@ async def orders_filter(callback: CallbackQuery, session: AsyncSession) -> None:
         )
         for o in orders
     )
-    if isinstance(callback.message, Message):
-        await callback.message.edit_text(
-            rows or t("orders.empty"), reply_markup=_order_filter_markup()
-        )
-    await callback.answer()
+    await message.answer(t("admin.order_search_results") + f"\n{rows}")
 
 
 @router.callback_query(F.data.startswith("ao:view:"))
@@ -359,12 +417,106 @@ async def admin_order_view(callback: CallbackQuery, session: AsyncSession) -> No
         )
         for status in ("preparing", "shipped", "out_for_delivery", "delivered", "cancelled")
     ]
-    markup = InlineKeyboardMarkup(
-        inline_keyboard=[buttons[i : i + 2] for i in range(0, len(buttons), 2)]
+    rows = [buttons[i : i + 2] for i in range(0, len(buttons), 2)]
+    rows.append(
+        [
+            InlineKeyboardButton(
+                text=t("admin.order_send_location"), callback_data=f"ao:loc:{order.id}"
+            )
+        ]
     )
+    if order.status in ("awaiting_payment", "paid"):
+        rows.append(
+            [
+                InlineKeyboardButton(
+                    text=t("admin.order_refund"), callback_data=f"aos:refund:{order.id}"
+                )
+            ]
+        )
+    markup = InlineKeyboardMarkup(inline_keyboard=rows)
     if isinstance(callback.message, Message):
         await callback.message.edit_text(await _order_details(session, order), reply_markup=markup)
     await callback.answer()
+
+
+@router.callback_query(F.data.startswith("aos:refund:"))
+async def admin_order_refund_start(
+    callback: CallbackQuery, state: FSMContext
+) -> None:
+    order_id = int(_data(callback).split(":")[2])
+    await state.set_state(AdminOrderRefund.reason)
+    await state.update_data(order_id=order_id)
+    if isinstance(callback.message, Message):
+        await callback.message.answer(t("admin.refund_ask"))
+    await callback.answer()
+
+
+@router.message(AdminOrderRefund.reason, F.text)
+async def admin_order_refund(
+    message: Message, state: FSMContext, session: AsyncSession, bot: Bot
+) -> None:
+    if message.from_user is None:
+        return
+    data = await state.get_data()
+    await state.clear()
+    order = await session.get(Order, int(data.get("order_id", 0)))
+    if order is None:
+        await message.answer(t("orders.gone"))
+        return
+    await admin_adjust(
+        session,
+        user_id=order.user_id,
+        amount_rial=order.total_rial,
+        reason=("refund " + order.public_code + " — " + (message.text or "")[:200]),
+        actor_telegram_id=message.from_user.id,
+    )
+    await session.commit()
+    user = await session.get(User, order.user_id)
+    if user is not None:
+        await notify_user(bot, session, user, t("notify.refunded", code=order.public_code))
+    await message.answer(t("admin.refund_done"))
+
+
+@router.callback_query(F.data.startswith("ao:loc:"))
+async def admin_send_location_start(
+    callback: CallbackQuery, state: FSMContext
+) -> None:
+    raw_id = _data(callback).split(":")[2]
+    await state.set_state(AdminOrderLocation.location)
+    await state.update_data(order_id=int(raw_id))
+    if isinstance(callback.message, Message):
+        await callback.message.answer(t("admin.location_ask"))
+    await callback.answer()
+
+
+@router.message(AdminOrderLocation.location, F.location)
+async def admin_send_location(
+    message: Message, state: FSMContext, session: AsyncSession, bot: Bot
+) -> None:
+    if message.from_user is None or message.location is None:
+        return
+    data = await state.get_data()
+    order = await session.get(Order, int(data.get("order_id", 0)))
+    if order is None:
+        await message.answer(t("orders.gone"))
+        await state.clear()
+        return
+    loc = message.location
+    order.delivery_location = {"latitude": loc.latitude, "longitude": loc.longitude}
+    if order.status in ("awaiting_payment", "paid"):
+        await set_order_status(session, order, "preparing", actor_telegram_id=message.from_user.id)
+    await session.commit()
+    await state.clear()
+    user = await session.get(User, order.user_id)
+    if user is not None:
+        try:
+            await bot.send_message(user.telegram_id, t("notify.order_verified"))
+            await bot.send_location(user.telegram_id, loc.latitude, loc.longitude)
+        except Exception as exc:  # best-effort; never fail the admin action
+            from app.logging import get_logger
+
+            get_logger("admin_shop").warning("location_notify_failed", error=str(exc))
+    await message.answer(t("admin.location_saved"))
 
 
 @router.callback_query(F.data.startswith("aos:"))
@@ -454,3 +606,17 @@ async def credit_command(message: Message, session: AsyncSession) -> None:
     )
     await session.commit()
     await message.answer(t("admin.credit_done"))
+
+
+@router.callback_query(F.data == "adm:goto:products")
+async def goto_products(callback: CallbackQuery, session: AsyncSession) -> None:
+    await products_menu(callback, session)
+
+
+@router.callback_query(F.data == "adm:goto:orders")
+async def goto_orders(callback: CallbackQuery) -> None:
+    if isinstance(callback.message, Message):
+        await callback.message.edit_text(
+            t("admin.orders_title"), reply_markup=_order_filter_markup()
+        )
+    await callback.answer()

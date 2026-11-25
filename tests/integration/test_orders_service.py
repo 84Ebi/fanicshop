@@ -51,16 +51,20 @@ async def _address(session: AsyncSession, user: User):
 
 async def test_create_order_reserves_stock_and_snapshots(db_session: AsyncSession) -> None:
     product, user = await _seed(db_session)
-    address = await _address(db_session, user)
     await add_item(db_session, user.id, product, 3)
     order = await create_order(
-        db_session, user_id=user.id, address=address, delivery_fee_rial=10_000
+        db_session,
+        user_id=user.id,
+        contact_kind="phone",
+        contact="9121234567",
+        delivery_fee_rial=10_000,
     )
 
     assert order.public_code.startswith("F-")
     assert order.status == "awaiting_payment" and order.payment_state == "unpaid"
     assert order.subtotal_rial == 600_000 and order.total_rial == 610_000
-    assert order.address_snapshot["city"] == "تهران"
+    assert order.address_snapshot["contact_kind"] == "phone"
+    assert order.address_snapshot["contact"] == "9121234567"
     assert (await db_session.get(Product, product.id)).reserved_qty == 3
     assert list(await db_session.scalars(select(CartItem))) == []
 
@@ -70,30 +74,33 @@ async def test_create_order_reserves_stock_and_snapshots(db_session: AsyncSessio
     assert [h.to_status for h in history] == ["awaiting_payment"]
 
     items_text, address_text = await format_order(db_session, order)
-    assert "قهوه عربیکا" in items_text and "تهران" in address_text
+    assert "قهوه عربیکا" in items_text
+    assert "شماره تماس" in address_text and "۰۹۱۲" in address_text
     assert await list_orders(db_session, user.id) == [order]
 
 
 async def test_create_order_guards(db_session: AsyncSession) -> None:
     product, user = await _seed(db_session)
-    address = await _address(db_session, user)
     with pytest.raises(EmptyCart):
-        await create_order(db_session, user_id=user.id, address=address)
+        await create_order(db_session, user_id=user.id, contact_kind="phone", contact="9121234567")
 
     await add_item(db_session, user.id, product, 2)
     with pytest.raises(NoAddress):
-        await create_order(db_session, user_id=user.id, address=None)
+        await create_order(db_session, user_id=user.id, contact_kind="phone", contact="")
 
     product.reserved_qty = 4  # only 1 free left
     with pytest.raises(StockChanged):
-        await create_order(db_session, user_id=user.id, address=address)
+        await create_order(
+            db_session, user_id=user.id, contact_kind="phone", contact="9121234567"
+        )
 
 
 async def test_cancel_order_releases_stock(db_session: AsyncSession) -> None:
     product, user = await _seed(db_session)
-    address = await _address(db_session, user)
     await add_item(db_session, user.id, product, 2)
-    order = await create_order(db_session, user_id=user.id, address=address)
+    order = await create_order(
+        db_session, user_id=user.id, contact_kind="phone", contact="9121234567"
+    )
 
     assert await cancel_order(db_session, order, actor_telegram_id=9001)
     assert order.status == "cancelled" and order.cancelled_at is not None

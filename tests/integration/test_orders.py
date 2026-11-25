@@ -81,12 +81,12 @@ async def test_address_lifecycle(db_session: AsyncSession) -> None:
 async def test_create_order_reserves_and_snapshots(db_session: AsyncSession) -> None:
     user, product = await _seed(db_session)
     await add_item(db_session, user.id, product, 2)
-    address = await _address(db_session, user.id)
 
     order = await create_order(
         db_session,
         user_id=user.id,
-        address=address,
+        contact_kind="phone",
+        contact="9121234567",
         delivery_note="تماس قبل از تحویل",
         delivery_fee_rial=5_000,
         actor_telegram_id=user.telegram_id,
@@ -100,7 +100,8 @@ async def test_create_order_reserves_and_snapshots(db_session: AsyncSession) -> 
     assert order.delivery_fee_rial == 5_000
     assert order.total_rial == 245_000
     assert order.wallet_paid_rial == 0 and order.card_paid_rial == 0
-    assert order.address_snapshot["receiver_name"] == "علی رضایی"
+    assert order.address_snapshot["contact_kind"] == "phone"
+    assert order.address_snapshot["contact"] == "9121234567"
     assert order.delivery_note == "تماس قبل از تحویل"
 
     # stock reservation
@@ -135,36 +136,35 @@ async def test_create_order_reserves_and_snapshots(db_session: AsyncSession) -> 
 
 async def test_create_order_empty_cart_raises(db_session: AsyncSession) -> None:
     user, _ = await _seed(db_session)
-    address = await _address(db_session, user.id)
     with pytest.raises(EmptyCart):
-        await create_order(db_session, user_id=user.id, address=address)
+        await create_order(db_session, user_id=user.id, contact_kind="phone", contact="9121234567")
 
 
 async def test_create_order_no_address_raises(db_session: AsyncSession) -> None:
     user, product = await _seed(db_session)
     await add_item(db_session, user.id, product, 1)
     with pytest.raises(NoAddress):
-        await create_order(db_session, user_id=user.id, address=None)
+        await create_order(db_session, user_id=user.id, contact_kind="phone", contact="")
 
 
 async def test_create_order_stock_guard(db_session: AsyncSession) -> None:
     user, product = await _seed(db_session, stock=3)
     await add_item(db_session, user.id, product, 2)
-    address = await _address(db_session, user.id)
 
     # Someone else reserves the remaining unit before checkout.
     product.reserved_qty += 2
     await db_session.flush()
 
     with pytest.raises(StockChanged):
-        await create_order(db_session, user_id=user.id, address=address)
+        await create_order(db_session, user_id=user.id, contact_kind="phone", contact="9121234567")
 
 
 async def test_cancel_releases_stock(db_session: AsyncSession) -> None:
     user, product = await _seed(db_session)
     await add_item(db_session, user.id, product, 3)
-    address = await _address(db_session, user.id)
-    order = await create_order(db_session, user_id=user.id, address=address)
+    order = await create_order(
+        db_session, user_id=user.id, contact_kind="phone", contact="9121234567"
+    )
     assert product.reserved_qty == 3
 
     assert await cancel_order(db_session, order, actor_telegram_id=user.telegram_id)

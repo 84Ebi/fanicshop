@@ -51,6 +51,7 @@ class Order(TimestampMixin, Base):
     card_paid_rial: Mapped[int] = mapped_column(BigInteger, default=0, nullable=False)
 
     address_snapshot: Mapped[dict] = mapped_column(JSON, nullable=False)
+    delivery_location: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     delivery_note: Mapped[str | None] = mapped_column(Text)
     admin_note: Mapped[str | None] = mapped_column(Text)
 
